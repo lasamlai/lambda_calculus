@@ -4,10 +4,9 @@
               read_lambda/1,
               write_lambda/1,
               proc/0,
+              proc_string/1,
               reduction/2
           ]).
-
-:- use_module(library(apply)).
 
 lambda_compile:-
     qsave_program(lambda_calculus,[goal(true),toplevel(main),stand_alone(true)]).
@@ -26,7 +25,7 @@ proc(A):-
     (   reduction(f([],A),f([],B))
     ->  %write_lambda(B),nl,
         proc(B)
-    ;   writeln("I can't reduce"),
+    ;   nl,
         write_lambda(A),nl,
         proc
     ).
@@ -66,6 +65,7 @@ redo_lambda(A):-
         redo_lambda(A)
     ).
 */
+/*
 lambda(A):-
     var(A).
 lambda(a(A,B)):-
@@ -77,7 +77,7 @@ lambda(l(A,B)):-
 lambda(f(LL,B)):-
     maplist(is_list,LL),
     lambda(B).
-
+*/
 write_lambda(A):-
     cyclic_term(A),
     writeln(A).
@@ -93,6 +93,13 @@ write_lambda_(L):-
 write_lambda_(L):-
     lambda_n(L,N),!,
     format("(~w)",N).
+write_lambda_(L):-
+    lambda_pair(L,X,Y),!,
+    format("<"),
+    write_lambda_(X),
+    format(","),
+    write_lambda_(Y),
+    format(">").
 
 
 /*
@@ -177,6 +184,13 @@ reduction(f(W,a(V,A)),f(R,a(V,B))):-
     var(V),
     !,
     reduction(f(W,A),f(R,B)).
+/* special */
+reduction(f(U,a(write,K)),f(U,l([C|A]-A, l(B-B, C)))):-
+    write_lambda(K).
+reduction(f(U,a(put_char,K)),f(U,l([C|A]-A, l(B-B, C)))):-
+    lambda_n(K,N),
+    put_char(N).
+/* main party */
 reduction(f(U,a(l(W-[],C),A)),f(WW,C)):-
     wyfiltruj(U,A,Z,B),
     maplist({Z,A}/[L,UU]>>copy_term(f(Z,A),f(UU,L)),W,NZ),
@@ -277,9 +291,19 @@ lam_i('Y') --> "Y".
 lam_i('TRUE') --> "TRUE".
 lam_i('FALSE') --> "FALSE".
 lam_i('plus') --> "plus".
+lam_i('mult') --> "mult".
 lam_i('succ') --> "succ".
 lam_i('SUCC') --> "SUCC".
+lam_i('exp') --> "exp".
+lam_i('value') --> "value".
+lam_i('I') --> "I".
 lam_i('PAIR') --> "PAIR".
+lam_i('AND') --> "AND".
+lam_i('OR') --> "OR".
+lam_i('IsZero') --> "IsZero".
+lam_i('write') --> "write".
+lam_i('put_char') --> "put_char".
+lam_i('pred') --> "pred".
 lam_i(pair(A,B)) --> "<",lam(A),",",lam(B),">".
 lam_i(A) --> "(",!,lam(A),")".
 lam_i(A) --> l_var(A).
@@ -394,11 +418,58 @@ lambda_const('PAIR',l([E|A]-A, l([F|B]-B, l([D|C]-C, a(a(D, E), F))))):-
     end(A),
     end(B),
     end(C).
+lambda_const('AND',l([E, C|A]-A, l([D|B]-B, a(a(C, D), E)))):-
+    end(A),
+    end(B).
+lambda_const('OR',l([E, C|A]-A, l([D|B]-B, a(a(C, D), E)))):-
+    end(A),
+    end(B).
+lambda_const('IsZero',l([B|A]-A, a(a(B, l(C-C, l(D-D, l([F|E]-E, F)))), l([I|G]-G, l(H-H, I))))):-
+    end(A),
+    end(C),
+    end(D),
+    end(E),
+    end(G),
+    end(H).
+lambda_const('mult',l([E|A]-A, l([F|B]-B, l([G|C]-C, l([H|D]-D, a(a(E, a(F, G)), H)))))):-
+    end(A),
+    end(B),
+    end(C),
+    end(D).
+lambda_const('exp',l([D|A]-A, l([C|B]-B, a(C, D)))):-
+    end(A),
+    end(B).
+lambda_const('value',l([D|A]-A, l([C|B]-B, a(C, D)))):-
+    end(A),
+    end(B).
+lambda_const('I',l([B|A]-A, B)):-
+    end(A).
+lambda_const('pred',l([B|A]-A, a(a(a(B, l([M, F|C]-C, l([E|D]-D, a(a(E, a(F, l(G-G, l([I|H]-H, I)))), l([Q, L|J]-J, l([R|K]-K, a(L, a(a(a(M, l(N-N, l([P|O]-O, P))), Q), R)))))))), l([T|S]-S, a(a(T, l(U-U, l([W|V]-V, W))), l(X-X, l([Z|Y]-Y, Z))))), l([C1|A1]-A1, l(B1-B1, C1))))):-
+    end(A),
+    end(C),
+    end(D),
+    end(G),
+    end(H),
+    end(J),
+    end(K),
+    end(N),
+    end(O),
+    end(S),
+    end(U),
+    end(V),
+    end(X),
+    end(Y),
+    end(A1),
+    end(B1).
+
 lambda_const(pair(X,Y),l([B|A]-A, a(a(B, X), Y))):-
     end(A).
 
+
 lambda_const(N,L):-
     lambda_number(L,N),!.
+
+lambda_pair(l([B|A]-A, a(a(B,X),Y)),X,Y).
 
 
 lambda_n(l(F-_,H),N):-
