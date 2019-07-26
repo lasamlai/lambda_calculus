@@ -95,12 +95,24 @@ write_lambda_(L):-
     format("(~w)",N).
 write_lambda_(L):-
     lambda_pair(L,X,Y),!,
+    format("["),
+    write_lambda_(X),
+    write_lambda_list(Y).
+write_lambda_(L):-
+    lambda_pair(L,X,Y),!,
     format("<"),
     write_lambda_(X),
     format(","),
     write_lambda_(Y),
     format(">").
-
+write_lambda_(L):-
+    lambda_krot(L,K),!,
+    (   K = []
+    ->  format("<>")
+    ;   K = [A|B],
+        format("<"),
+        write_lambda_(A),
+        write_lambda_krot(B)).
 
 /*
 write_lambda_(l([], l([A], A))):-
@@ -167,6 +179,28 @@ write_lambda_l(A):-
     format("."),
     write_lambda_(A).
 
+write_lambda_krot([]):-
+    format(">").
+write_lambda_krot([A|B]):-
+    format("|"),
+    write_lambda_(A),
+    write_lambda_krot(B).
+
+write_lambda_list(FALSE):-
+    lambda_const('FALSE',FALSE),
+    !,
+    format("]").
+write_lambda_list(PAIR):-
+    lambda_pair(PAIR,A,B),
+    !,
+    format(","),
+    write_lambda_(A),
+    write_lambda_list(B).
+write_lambda_list(A):-
+    !,
+    format("|"),
+    write_lambda_(A),
+    format("]").
 
 /*
  * @bug lx.(lx.xx)x
@@ -296,7 +330,7 @@ lam_i('succ') --> "succ".
 lam_i('SUCC') --> "SUCC".
 lam_i('exp') --> "exp".
 lam_i('value') --> "value".
-lam_i('I') --> "I".
+lam_i('<>') --> "<>".
 lam_i('PAIR') --> "PAIR".
 lam_i('AND') --> "AND".
 lam_i('OR') --> "OR".
@@ -304,9 +338,22 @@ lam_i('IsZero') --> "IsZero".
 lam_i('write') --> "write".
 lam_i('put_char') --> "put_char".
 lam_i('pred') --> "pred".
+lam_i('IsNil') --> "IsNil".
 lam_i(pair(A,B)) --> "<",lam(A),",",lam(B),">".
+lam_i(krot([A|B])) --> "<",lam(A),lam_i_krot(B).
+lam_i(list([])) --> "[]".
+lam_i(list([A|B])) --> "[",lam(A),lam_i_list(B).
 lam_i(A) --> "(",!,lam(A),")".
 lam_i(A) --> l_var(A).
+
+lam_i_krot([]) --> ">",!.
+lam_i_krot([A|B]) --> "|",lam(A),lam_i_krot(B).
+
+lam_i_list([]) --> "]",!.
+lam_i_list(A) --> "|",!,lam(A),"]".
+lam_i_list([A|B]) --> ",",!,lam(A),lam_i_list(B).
+
+
 
 %```
 %l_var := Char
@@ -337,6 +384,12 @@ lam_var(pair(V,W),l([B|A]-A, a(a(B, X), Y)),R,P):-
     !,
     lam_var(V,X,R,E),
     lam_var(W,Y,E,P).
+lam_var(krot(KK),l([F|H]-H, W),R,P):-
+    !,
+    reverse(KK,K),
+    lam_var_krot(K,F,W,R,P).
+lam_var(list(LL),L,R,P):-
+    lam_var_list(LL,L,R,P).
 lam_var(A,L,P,P):-
     lambda_const(A,L),!.
 /*lam_var('Y',l([G, C|A]-A, a(l([E, D|B]-B, a(C, a(D, E))), l([I, H|F]-F, a(G, a(H, I))))),P,P):-
@@ -353,6 +406,21 @@ lam_var(A,W,R,P):-
     !,
     add_lists(A,W,R,P).
 lam_var(A,A,P,P).
+
+lam_var_krot([],F,F,P,P):-!.
+lam_var_krot([A|B],F,a(W,AA),R,P):-
+    lam_var(A,AA,R,E),
+    lam_var_krot(B,F,W,E,P).
+
+lam_var_list([],L,P,P):-
+    lambda_const('FALSE',L),!.
+lam_var_list([A|B],L,R,P):-
+    !,
+    lam_var(A,AA,R,E),
+    lambda_pair(L,AA,K),
+    lam_var_list(B,K,E,P).
+lam_var_list(A,AA,R,P):-
+    lam_var(A,AA,R,P).
 
 add_lists(_,_,[],[]):-
     throw("error adding to list").
@@ -395,6 +463,9 @@ lambda_const('Y',l([G, C|A]-A, a(l([E, D|B]-B, a(C, a(D, E))), l([I, H|F]-F, a(G
     end(A),
     end(B),
     end(F).
+lambda_const('[]',l(A-A, l([C|B]-B, C))):-
+    end(A),
+    end(B).
 lambda_const('FALSE',l(A-A, l([C|B]-B, C))):-
     end(A),
     end(B).
@@ -421,6 +492,16 @@ lambda_const('PAIR',l([E|A]-A, l([F|B]-B, l([D|C]-C, a(a(D, E), F))))):-
 lambda_const('AND',l([E, C|A]-A, l([D|B]-B, a(a(C, D), E)))):-
     end(A),
     end(B).
+lambda_const('IsNil',l([B|A]-A, a(a(B, l(C-C, l(D-D, l(E-E, l(F-F, l([H|G]-G, H)))))), l([K|I]-I, l(J-J, K))))):-
+    end(A),
+    end(C),
+    end(D),
+    end(E),
+    end(F),
+    end(G),
+    end(I),
+    end(J).
+
 lambda_const('OR',l([E, C|A]-A, l([D|B]-B, a(a(C, D), E)))):-
     end(A),
     end(B).
@@ -442,7 +523,7 @@ lambda_const('exp',l([D|A]-A, l([C|B]-B, a(C, D)))):-
 lambda_const('value',l([D|A]-A, l([C|B]-B, a(C, D)))):-
     end(A),
     end(B).
-lambda_const('I',l([B|A]-A, B)):-
+lambda_const('<>',l([B|A]-A, B)):-
     end(A).
 lambda_const('pred',l([B|A]-A, a(a(a(B, l([M, F|C]-C, l([E|D]-D, a(a(E, a(F, l(G-G, l([I|H]-H, I)))), l([Q, L|J]-J, l([R|K]-K, a(L, a(a(a(M, l(N-N, l([P|O]-O, P))), Q), R)))))))), l([T|S]-S, a(a(T, l(U-U, l([W|V]-V, W))), l(X-X, l([Z|Y]-Y, Z))))), l([C1|A1]-A1, l(B1-B1, C1))))):-
     end(A),
@@ -471,6 +552,13 @@ lambda_const(N,L):-
 
 lambda_pair(l([B|A]-A, a(a(B,X),Y)),X,Y).
 
+lambda_krot(l([F|A]-A, W),M):-
+    lambda_krot_(F,W,[],M).
+
+lambda_krot_(F,FF,A,A):-
+    F == FF,!.
+lambda_krot_(F,a(W,X),L,M):-
+    lambda_krot_(F,W,[X|L],M).
 
 lambda_n(l(F-_,H),N):-
     lambda_n1(F,H,N).
