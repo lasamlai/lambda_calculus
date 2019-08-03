@@ -79,9 +79,6 @@ lambda(f(LL,B)):-
     lambda(B).
 */
 write_lambda(A):-
-    cyclic_term(A),
-    writeln(A).
-write_lambda(A):-
     copy_term(A,B),
     make_ground(B,[],_),
     write_lambda_(B).
@@ -102,7 +99,7 @@ write_lambda_(L):-
     lambda_pair(L,X,Y),!,
     format("<"),
     write_lambda_(X),
-    format(","),
+    format("|"),
     write_lambda_(Y),
     format(">").
 write_lambda_(L):-
@@ -201,14 +198,6 @@ write_lambda_list(A):-
     format("|"),
     write_lambda_(A),
     format("]").
-
-/*
- * @bug lx.(lx.xx)x
- *      lx.ab
- *
- *      lx.xx
- *      l([X1,X2|Q]-Q,a(l([_____]-_,O),X2))
- */
 
 reduction(f(_,A),_):-
     var(A),
@@ -322,23 +311,9 @@ lam_t(A,T) --> lam_i(B),(lam_t(a(A,B),T);{T=a(A,B)}).
 
 lam_i(N) --> number(N).
 lam_i('Y') --> "Y".
-lam_i('TRUE') --> "TRUE".
-lam_i('FALSE') --> "FALSE".
-lam_i('plus') --> "plus".
-lam_i('mult') --> "mult".
-lam_i('succ') --> "succ".
-lam_i('SUCC') --> "SUCC".
-lam_i('exp') --> "exp".
-lam_i('value') --> "value".
-lam_i('<>') --> "<>".
-lam_i('PAIR') --> "PAIR".
-lam_i('AND') --> "AND".
-lam_i('OR') --> "OR".
-lam_i('IsZero') --> "IsZero".
 lam_i('write') --> "write".
 lam_i('put_char') --> "put_char".
-lam_i('pred') --> "pred".
-lam_i('IsNil') --> "IsNil".
+lam_i(A) --> lam_i_macros(A).
 lam_i(pair(A,B)) --> "<",lam(A),",",lam(B),">".
 lam_i(krot([A|B])) --> "<",lam(A),lam_i_krot(B).
 lam_i(list([])) --> "[]".
@@ -352,8 +327,6 @@ lam_i_krot([A|B]) --> "|",lam(A),lam_i_krot(B).
 lam_i_list([]) --> "]",!.
 lam_i_list(A) --> "|",!,lam(A),"]".
 lam_i_list([A|B]) --> ",",!,lam(A),lam_i_list(B).
-
-
 
 %```
 %l_var := Char
@@ -461,13 +434,15 @@ lambda_const(A,B):-
     lambda_const_(A,B).
 */
 
-:- dynamic lambda_const/2.
 
 lambda_const_add(Atom,String):-
     string_lambda(String,L),
     find_(L,M,[]),
     list_to_and(M,F),
-    assertz(:-(lambda_const(Atom,L),F)).
+    assertz(:-(lambda_const(Atom,L),F)),
+    atom_string(Atom,SS),
+    expand_term(lam_i_macros(Atom)-->SS,EE),
+    assertz(EE).
 
 find_(A,F,F):-
     var(A),!.
@@ -485,32 +460,6 @@ end(L):-
     var(L),!.
 end([]).
 
-:- lambda_const_add('Y',"lf.(lx.f(xx))(lx.f(xx))").
-:- lambda_const_add('[]',"l_a.a").
-:- lambda_const_add('FALSE',"l_x.x").
-:- lambda_const_add('TRUE',"lx_.x").
-:- lambda_const_add('plus',"lmnfx.mf(nfx)").
-:- lambda_const_add('succ',"lnfx.f(nfx)").
-:- lambda_const_add('SUCC',"lnfx.nf(fx)").
-:- lambda_const_add('PAIR',"labf.fab").
-:- lambda_const_add('AND',"lpq.pqp").
-:- lambda_const_add('OR',"lpq.ppq").
-:- lambda_const_add('IsNil',"lw.w(lhtd.FALSE)TRUE").
-:- lambda_const_add('IsZero',"ln.n(lx.FALSE)TRUE").
-:- lambda_const_add('mult',"lmnfx.m(nf)x").
-:- lambda_const_add('exp',"lmn.nm").
-:- lambda_const_add('value',"lmn.nm").
-:- lambda_const_add('<>',"lx.x").
-:- lambda_const_add('pred',"lnfx.n(lgh.h(gf))(lu.x)(lu.u)").
-
-:- compile_predicates([lambda_const/2]).
-
-lambda_const(pair(X,Y),l([B|A]-A, a(a(B, X), Y))):-
-    end(A).
-
-
-lambda_const(N,L):-
-    lambda_number(L,N),!.
 
 lambda_pair(l([B|A]-A, a(a(B,X),Y)),X,Y).
 
@@ -552,6 +501,42 @@ lambda_number_([F|K]-L,a(F,M),X,NN):-
 lambda_number_([F|K]-L,a(F,M),X,NN):-
     lambda_number_(K-L,M,X,N),
     succ(N,NN).
+
+:- dynamic lambda_const/2.
+:- dynamic lam_i_macros//1.
+
+:- lambda_const_add('Y',"lf.(lx.f(xx))(lx.f(xx))").
+:- lambda_const_add('[]',"l_a.a").
+:- lambda_const_add('FALSE',"l_x.x").
+:- lambda_const_add('TRUE',"lx_.x").
+:- lambda_const_add('Nsucc',"lnfx.f(nfx)").
+:- lambda_const_add('NSUCC',"lnfx.nf(fx)").
+:- lambda_const_add('Nplus',"lmnfx.mf(nfx)").
+:- lambda_const_add('Npred',"lnfx.n(lgh.h(gf))(lu.x)(lu.u)").
+:- lambda_const_add('Nminus',"lmn.nNpredm").
+:- lambda_const_add('Nmult',"lmnfx.m(nf)x").
+:- lambda_const_add('Nexp',"lmn.nm").
+:- lambda_const_add('PAIR',"labf.fab").
+:- lambda_const_add('AND',"lpq.pqp").
+:- lambda_const_add('OR',"lpq.ppq").
+:- lambda_const_add('IsNil',"lw.w(lhtd.FALSE)TRUE").
+:- lambda_const_add('NIsZero',"ln.n(lx.FALSE)TRUE").
+:- lambda_const_add('IsZero',"NIsZero").
+:- lambda_const_add('value',"lmn.nm").
+:- lambda_const_add('<>',"lx.x").
+:- lambda_const_add('Nleq',"lmn.NIsZero(Nminusmn)").
+:- lambda_const_add('Neq',"lmn.AND(Nleqmn)(Nleqnm)").
+:- lambda_const_add('Svar',"ln.<0|n>").
+:- lambda_const_add('Sapp',"lab.<1|<a|b>>").
+:- lambda_const_add('Slam',"lvw.<2|<v|w>>").
+%:- lambda_const_add('MAP',"ldi.(Neqi(dTRUETRUE))(dTRUE[])(MAP(d[])i)").
+
+:- compile_predicates([lambda_const/2,lam_i_macros//1]).
+
+
+/**@test (Y(lfx.(IsZerox)12(f(predx))))1
+ *
+ */
 
 %!  lambda_eq(Vars1,L1,Vars2,L2) is det
 
