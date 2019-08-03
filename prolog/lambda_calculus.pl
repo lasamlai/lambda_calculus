@@ -391,6 +391,7 @@ lam_var(krot(KK),l([F|H]-H, W),R,P):-
 lam_var(list(LL),L,R,P):-
     lam_var_list(LL,L,R,P).
 lam_var(A,L,P,P):-
+    atom(A),
     lambda_const(A,L),!.
 /*lam_var('Y',l([G, C|A]-A, a(l([E, D|B]-B, a(C, a(D, E))), l([I, H|F]-F, a(G, a(H, I))))),P,P):-
     !.*/
@@ -459,89 +460,50 @@ lambda_const(A,B):-
     var(A),
     lambda_const_(A,B).
 */
-lambda_const('Y',l([G, C|A]-A, a(l([E, D|B]-B, a(C, a(D, E))), l([I, H|F]-F, a(G, a(H, I)))))):-
-    end(A),
-    end(B),
-    end(F).
-lambda_const('[]',l(A-A, l([C|B]-B, C))):-
-    end(A),
-    end(B).
-lambda_const('FALSE',l(A-A, l([C|B]-B, C))):-
-    end(A),
-    end(B).
-lambda_const('TRUE',l([C|A]-A, l(B-B, C))):-
-    end(A),
-    end(B).
-lambda_const('plus',l([E|A]-A, l([G|B]-B, l([H, F|C]-C, l([I|D]-D, a(a(E, F), a(a(G, H), I))))))):-
-    end(A),
-    end(B),
-    end(C),
-    end(D).
-lambda_const('succ',l([E|A]-A, l([F, D|B]-B, l([G|C]-C, a(D, a(a(E, F), G)))))):-
-    end(A),
-    end(B),
-    end(C).
-lambda_const('SUCC',l([D|A]-A, l([F, E|B]-B, l([G|C]-C, a(a(D, E), a(F, G)))))):-
-    end(A),
-    end(B),
-    end(C).
-lambda_const('PAIR',l([E|A]-A, l([F|B]-B, l([D|C]-C, a(a(D, E), F))))):-
-    end(A),
-    end(B),
-    end(C).
-lambda_const('AND',l([E, C|A]-A, l([D|B]-B, a(a(C, D), E)))):-
-    end(A),
-    end(B).
-lambda_const('IsNil',l([B|A]-A, a(a(B, l(C-C, l(D-D, l(E-E, l(F-F, l([H|G]-G, H)))))), l([K|I]-I, l(J-J, K))))):-
-    end(A),
-    end(C),
-    end(D),
-    end(E),
-    end(F),
-    end(G),
-    end(I),
-    end(J).
 
-lambda_const('OR',l([E, C|A]-A, l([D|B]-B, a(a(C, D), E)))):-
-    end(A),
-    end(B).
-lambda_const('IsZero',l([B|A]-A, a(a(B, l(C-C, l(D-D, l([F|E]-E, F)))), l([I|G]-G, l(H-H, I))))):-
-    end(A),
-    end(C),
-    end(D),
-    end(E),
-    end(G),
-    end(H).
-lambda_const('mult',l([E|A]-A, l([F|B]-B, l([G|C]-C, l([H|D]-D, a(a(E, a(F, G)), H)))))):-
-    end(A),
-    end(B),
-    end(C),
-    end(D).
-lambda_const('exp',l([D|A]-A, l([C|B]-B, a(C, D)))):-
-    end(A),
-    end(B).
-lambda_const('value',l([D|A]-A, l([C|B]-B, a(C, D)))):-
-    end(A),
-    end(B).
-lambda_const('<>',l([B|A]-A, B)):-
-    end(A).
-lambda_const('pred',l([B|A]-A, a(a(a(B, l([M, F|C]-C, l([E|D]-D, a(a(E, a(F, l(G-G, l([I|H]-H, I)))), l([Q, L|J]-J, l([R|K]-K, a(L, a(a(a(M, l(N-N, l([P|O]-O, P))), Q), R)))))))), l([T|S]-S, a(a(T, l(U-U, l([W|V]-V, W))), l(X-X, l([Z|Y]-Y, Z))))), l([C1|A1]-A1, l(B1-B1, C1))))):-
-    end(A),
-    end(C),
-    end(D),
-    end(G),
-    end(H),
-    end(J),
-    end(K),
-    end(N),
-    end(O),
-    end(S),
-    end(U),
-    end(V),
-    end(X),
-    end(Y),
-    end(A1),
-    end(B1).
+:- dynamic lambda_const/2.
+
+lambda_const_add(Atom,String):-
+    string_lambda(String,L),
+    find_(L,M,[]),
+    list_to_and(M,F),
+    assertz(:-(lambda_const(Atom,L),F)).
+
+find_(A,F,F):-
+    var(A),!.
+find_(l(_-A,K),[end(A)|F],L):-
+    find_(K,F,L).
+find_(a(A,B),F,L):-
+    find_(A,F,E),
+    find_(B,E,L).
+
+list_to_and([A],A):-!.
+list_to_and([A|B],(A,C)):-
+    list_to_and(B,C).
+
+end(L):-
+    var(L),!.
+end([]).
+
+:- lambda_const_add('Y',"lf.(lx.f(xx))(lx.f(xx))").
+:- lambda_const_add('[]',"l_a.a").
+:- lambda_const_add('FALSE',"l_x.x").
+:- lambda_const_add('TRUE',"lx_.x").
+:- lambda_const_add('plus',"lmnfx.mf(nfx)").
+:- lambda_const_add('succ',"lnfx.f(nfx)").
+:- lambda_const_add('SUCC',"lnfx.nf(fx)").
+:- lambda_const_add('PAIR',"labf.fab").
+:- lambda_const_add('AND',"lpq.pqp").
+:- lambda_const_add('OR',"lpq.ppq").
+:- lambda_const_add('IsNil',"lw.w(lhtd.FALSE)TRUE").
+:- lambda_const_add('IsZero',"ln.n(lx.FALSE)TRUE").
+:- lambda_const_add('mult',"lmnfx.m(nf)x").
+:- lambda_const_add('exp',"lmn.nm").
+:- lambda_const_add('value',"lmn.nm").
+:- lambda_const_add('<>',"lx.x").
+:- lambda_const_add('pred',"lnfx.n(lgh.h(gf))(lu.x)(lu.u)").
+
+:- compile_predicates([lambda_const/2]).
 
 lambda_const(pair(X,Y),l([B|A]-A, a(a(B, X), Y))):-
     end(A).
@@ -590,10 +552,6 @@ lambda_number_([F|K]-L,a(F,M),X,NN):-
 lambda_number_([F|K]-L,a(F,M),X,NN):-
     lambda_number_(K-L,M,X,N),
     succ(N,NN).
-
-end(L):-
-    var(L),!.
-end([]).
 
 %!  lambda_eq(Vars1,L1,Vars2,L2) is det
 
