@@ -23,7 +23,7 @@ proc:-
 
 proc(A):-
     (   reduction(f([],A),f([],B))
-    ->  %write_lambda(B),nl,
+    ->  %write_lambda(B),nl,nl,
         proc(B)
     ;   nl,
         write_lambda(A),nl,
@@ -83,33 +83,37 @@ write_lambda(A):-
     make_ground(B,[],_),
     write_lambda_(B).
 
-write_lambda_(L):-
-    lambda_const(K,LL),
-    lambda_eq([],L,[],LL),!,
-    format("(~w)",K).
-write_lambda_(L):-
-    lambda_n(L,N),!,
-    format("(~w)",N).
-write_lambda_(L):-
-    lambda_pair(L,X,Y),!,
-    format("["),
+write_lambda_unlam(const(K)):-
+    !,
+    format("\e[93m~w\e[39m",K).
+write_lambda_unlam(nat(N)):-
+    !,
+    format("(\e[36m~wN\e[39m)",N).
+write_lambda_unlam(list([X|Y])):-
+    !,
+    format("\e[93m[\e[39m"),
     write_lambda_(X),
     write_lambda_list(Y).
-write_lambda_(L):-
-    lambda_pair(L,X,Y),!,
-    format("<"),
+write_lambda_unlam(pair(X,Y)):-
+    !,
+    format("\e[93m<\e[39m"),
     write_lambda_(X),
-    format("|"),
+    format("\e[93m|\e[39m"),
     write_lambda_(Y),
-    format(">").
-write_lambda_(L):-
-    lambda_krot(L,K),!,
+    format("\e[93m>\e[39m").
+write_lambda_unlam(krot(K)):-
+    !,
     (   K = []
-    ->  format("<>")
+    ->  format("\e[93m<>\e[39m")
     ;   K = [A|B],
-        format("<"),
+        format("\e[93m<\e[39m"),
         write_lambda_(A),
         write_lambda_krot(B)).
+
+write_lambda_(L):-
+    witch_lambda_const_(L,K),
+    !,
+    write_lambda_unlam(K).
 
 /*
 write_lambda_(l([], l([A], A))):-
@@ -124,14 +128,16 @@ write_lambda_(L):-
 write_lambda_(A):-
     var(A),!,
     format("~w",[A]).
+
 write_lambda_(l(L-L,B)):-
     !,
-    format("λ_"),
+    format("\e[91mλ\e[90m_"),
     write_lambda_l(B).
 write_lambda_(l([A|_]-[],B)):-
     !,
-    format("λ~w",[A]),
+    format("\e[91mλ\e[34m~w",[A]),
     write_lambda_l(B).
+
 write_lambda_(a(A,C)):-
     !,
     write_lambda_n(A),
@@ -164,40 +170,69 @@ write_lambda_k(a(K,W)):-
 write_lambda_k(A):-
     write_lambda_(A).
 
-write_lambda_l(l([],B)):-
+write_lambda_l(L):-
+    witch_lambda_const_(L,K),!,
+    format("\e[91m.\e[39m"),
+    write_lambda_unlam(K).
+/*
+write_lambda_l(L):-
+    lambda_n(L,N),!,
+    format("\e[91m.\e[39m(\e[36m~w\e[39m)",N).
+*/
+write_lambda_l(l(L-L,B)):-
     !,
-    format("_"),
+    format("\e[90m_"),
     write_lambda_l(B).
-write_lambda_l(l([A|_],B)):-
+write_lambda_l(l([A|_]-[],B)):-
     !,
-    format("~w",[A]),
+    format("\e[34m~w",[A]),
     write_lambda_l(B).
 write_lambda_l(A):-
-    format("."),
+    format("\e[91m.\e[39m"),
     write_lambda_(A).
 
 write_lambda_krot([]):-
-    format(">").
+    format("\e[93m>\e[39m").
 write_lambda_krot([A|B]):-
-    format("|"),
+    format("\e[93m|\e[39m"),
     write_lambda_(A),
     write_lambda_krot(B).
 
-write_lambda_list(FALSE):-
-    lambda_const('FALSE',FALSE),
+write_lambda_list([]):-
     !,
-    format("]").
-write_lambda_list(PAIR):-
-    lambda_pair(PAIR,A,B),
+    format("\e[93m]\e[39m").
+write_lambda_list([A|B]):-
     !,
-    format(","),
+    format("\e[93m,\e[39m"),
     write_lambda_(A),
     write_lambda_list(B).
 write_lambda_list(A):-
     !,
-    format("|"),
+    format("\e[93m|\e[39m"),
     write_lambda_(A),
-    format("]").
+    format("\e[93m]\e[39m").
+
+witch_lambda_const_(L,const(K)):-
+    lambda_const(K,LL),
+    lambda_eq([],L,[],LL).
+witch_lambda_const_(L,nat(N)):-
+    lambda_n(L,N).
+witch_lambda_const_(L,list([H|T])):-
+    lambda_pair(L,H,Y),!,
+    witch_lambda_list(Y,T).
+witch_lambda_const_(L,pair(X,Y)):-
+    lambda_pair(L,X,Y),!.
+witch_lambda_const_(L,krot(K)):-
+    lambda_krot(L,K),!.
+
+witch_lambda_list(FALSE,[]):-
+    lambda_const('FALSE',FALSE),!.
+witch_lambda_list(PAIR,[H|T]):-
+    lambda_pair(PAIR,H,Y),
+    !,
+    witch_lambda_list(Y,T).
+witch_lambda_list(A,A).
+
 
 reduction(f(_,A),_):-
     var(A),
@@ -218,11 +253,6 @@ reduction(f(U,a(l(W-[],C),A)),f(WW,C)):-
     wyfiltruj(U,A,Z,B),
     maplist({Z,A}/[L,UU]>>copy_term(f(Z,A),f(UU,L)),W,NZ),
     jednocz([B|NZ],WW).
-/*
-reduction(f(U,a(l(W-[],C),A)),f(WW,C)):-
-    maplist({U,A}/[L,UU]>>copy_term(f(U,A),f(UU,L)),W,NU),
-    jednocz([U|NU],WW).
-*/
 reduction(f(U,a(A,B)),f(G,a(C,D))):-
     reduction(f(U,A),f(K,C)),
     (   reduction(f(K,B),f(G,D))
@@ -230,12 +260,6 @@ reduction(f(U,a(A,B)),f(G,a(C,D))):-
     ;   K=G,B=D).
 reduction(f(U,a(A,B)),f(K,a(A,D))):-
     reduction(f(U,B),f(K,D)).
-/*
-reduction(f(U,a(A,B)),f(K,a(C,B))):-
-    reduction(f(U,A),f(K,C)).
-reduction(f(U,a(A,B)),f(K,a(A,D))):-
-    reduction(f(U,B),f(K,D)).
-*/
 reduction(f(U,l(A,B)),f(K,l(AA,D))):-
     reduction(f([A|U],B),f([AA|K],D)).
 
@@ -309,17 +333,31 @@ lam_t(A,T) --> lam_i(B),(lam_t(a(A,B),T);{T=a(A,B)}).
 %       | l_var
 %```
 
-lam_i(N) --> number(N).
+lam_i(nat(N)) --> number(N),"N".
+lam_i(int(N)) --> number(N),"Z".
+lam_i(nat(N)) --> number(N).
 lam_i('Y') --> "Y".
 lam_i('write') --> "write".
 lam_i('put_char') --> "put_char".
 lam_i(A) --> lam_i_macros(A).
+lam_i(A) --> up_chars(A).
 lam_i(pair(A,B)) --> "<",lam(A),",",lam(B),">".
 lam_i(krot([A|B])) --> "<",lam(A),lam_i_krot(B).
 lam_i(list([])) --> "[]".
 lam_i(list([A|B])) --> "[",lam(A),lam_i_list(B).
 lam_i(A) --> "(",!,lam(A),")".
 lam_i(A) --> l_var(A).
+
+up_chars(A) -->
+    up_chars_(AA),
+    {AA \= [],
+     atom_codes(A,AA)}.
+
+up_chars_([C|T]) -->
+    [C],
+    {between(65,90,C)},
+    up_chars_(T).
+up_chars_([]) --> [].
 
 lam_i_krot([]) --> ">",!.
 lam_i_krot([A|B]) --> "|",lam(A),lam_i_krot(B).
@@ -332,7 +370,7 @@ lam_i_list([A|B]) --> ",",!,lam(A),lam_i_list(B).
 %l_var := Char
 %```
 
-l_var(A) --> [C],{between(97,122,C)/*;between(65,90,C)*/},!,{atom_codes(A,[C])}.
+l_var(A) --> [C],{between(97,122,C),!,atom_codes(A,[C])}.
 
 %```
 %lam_ :=
@@ -349,7 +387,7 @@ lam_(l(A,B))--> l_var(A),lam_(B).
 % Tu Analizujemu sparsowane dane
 
 
-lam_var(N,L,P,P):-
+lam_var(nat(N),L,P,P):-
     number(N),
     !,
     lambda_number(L,N),!.
@@ -362,6 +400,7 @@ lam_var(krot(KK),l([F|H]-H, W),R,P):-
     reverse(KK,K),
     lam_var_krot(K,F,W,R,P).
 lam_var(list(LL),L,R,P):-
+    !,
     lam_var_list(LL,L,R,P).
 lam_var(A,L,P,P):-
     atom(A),
@@ -522,19 +561,19 @@ lambda_number_([F|K]-L,a(F,M),X,NN):-
 :- lambda_const_add('IsNil',"lw.w(lhtd.FALSE)TRUE").
 :- lambda_const_add('NIsZero',"ln.n(lx.FALSE)TRUE").
 :- lambda_const_add('IsZero',"NIsZero").
-:- lambda_const_add('value',"lmn.nm").
+:- lambda_const_add('Value',"lmn.nm").
 :- lambda_const_add('<>',"lx.x").
 :- lambda_const_add('Nleq',"lmn.NIsZero(Nminusmn)").
 :- lambda_const_add('Neq',"lmn.AND(Nleqmn)(Nleqnm)").
-:- lambda_const_add('Svar',"ln.<0|n>").
-:- lambda_const_add('Sapp',"lab.<1|<a|b>>").
-:- lambda_const_add('Slam',"lvw.<2|<v|w>>").
+:- lambda_const_add('Svar',"ln.<0N|n>").
+:- lambda_const_add('Sapp',"lab.<1N|<a|b>>").
+:- lambda_const_add('Slam',"lvw.<2N|<v|w>>").
 %:- lambda_const_add('MAP',"ldi.(Neqi(dTRUETRUE))(dTRUE[])(MAP(d[])i)").
 
 :- compile_predicates([lambda_const/2,lam_i_macros//1]).
 
 
-/**@test (Y(lfx.(IsZerox)12(f(predx))))1
+/**@test (Y(lfx.(NIsZerox)12(f(Npredx))))1
  *
  */
 
