@@ -104,6 +104,10 @@ write_lambda_unlam(const(K),_,_):-
 write_lambda_unlam(nat(N),_,_):-
     !,
     format("(\e[36m~wN\e[39m)",N).
+write_lambda_unlam(int(N),_,_):-
+    !,
+    format("(\e[36m~wZ\e[39m)",N).
+
 write_lambda_unlam(list([X|Y]),Z,R):-
     !,
     format("\e[93m[\e[39m"),
@@ -241,6 +245,11 @@ witch_lambda_const_(L,const(K)):-
     lambda_eq([],L,[],LL).
 witch_lambda_const_(L,nat(N)):-
     lambda_n(L,N).
+witch_lambda_const_(L,int(Z)):-
+    is_lambda_pair(L,A,B),
+    lambda_n(A,N),
+    lambda_n(B,M),!,
+    Z is N - M.
 witch_lambda_const_(L,list([H|T])):-
     is_lambda_pair(L,H,Y),!,
     witch_lambda_list(Y,T).
@@ -350,7 +359,7 @@ string_lambda(S,LL):-
 %      | L lam_
 %      | lam_t
 % ```
-lam(L) --> ("l";"λ"),!,lam_(L).
+lam(L) --> ("l";"λ";"\\"),!,lam_(L).
 lam(A) --> lam_t(A).
 
 %```
@@ -435,6 +444,17 @@ lam_var(nat(N),L,P,P):-
     number(N),
     !,
     lambda_number(L,N),!.
+lam_var(int(N),L,P,P):-
+    number(N),
+    !,
+    (   N >= 0
+    ->  lambda_number(NL,N),!,
+        lambda_const('FALSE',FL),!,
+        get_lambda_pair(L,NL,FL)
+    ;   NN is -N,
+        lambda_number(NL,NN),!,
+        lambda_const('FALSE',FL),!,
+        get_lambda_pair(L,FL,NL)).
 lam_var(pair(V,W),l([B|A]-A, a(a(B, X), Y)),R,P):-
     !,
     lam_var(V,X,R,E),
@@ -571,10 +591,13 @@ lambda_number_([F|K]-L,a(F,M),X,NN):-
 :- dynamic lambda_const/2.
 :- dynamic lam_i_macros//1.
 
+:- lambda_const_add('<>',"lx.x").
 :- lambda_const_add('Y',"lf.(lx.f(xx))(lx.f(xx))").
+
 :- lambda_const_add('[]',"l_a.a").
 :- lambda_const_add('FALSE',"l_x.x").
 :- lambda_const_add('TRUE',"lx_.x").
+
 :- lambda_const_add('Nsucc',"lnfx.f(nfx)").
 :- lambda_const_add('NSUCC',"lnfx.nf(fx)").
 :- lambda_const_add('Nplus',"lmnfx.mf(nfx)").
@@ -582,16 +605,28 @@ lambda_number_([F|K]-L,a(F,M),X,NN):-
 :- lambda_const_add('Nminus',"lmn.nNpredm").
 :- lambda_const_add('Nmult',"lmnfx.m(nf)x").
 :- lambda_const_add('Nexp',"lmn.nm").
+:- lambda_const_add('NIsZero',"ln.n(lx.FALSE)TRUE").
+
 :- lambda_const_add('PAIR',"labf.fab").
+:- lambda_const_add('CAR',"<TRUE>").
+:- lambda_const_add('CDR',"<[]>").
 :- lambda_const_add('AND',"lpq.pqp").
 :- lambda_const_add('OR',"lpq.ppq").
 :- lambda_const_add('IsNil',"lw.w(lhtd.FALSE)TRUE").
-:- lambda_const_add('NIsZero',"ln.n(lx.FALSE)TRUE").
-:- lambda_const_add('IsZero',"NIsZero").
-:- lambda_const_add('Value',"lmn.nm").
-:- lambda_const_add('<>',"lx.x").
+
 :- lambda_const_add('Nleq',"lmn.NIsZero(Nminusmn)").
 :- lambda_const_add('Neq',"lmn.AND(Nleqmn)(Nleqnm)").
+
+:- lambda_const_add('NtoZ',"ln.<n|0>").
+:- lambda_const_add('Zneg',"λa.[a([])|a(TRUE)]").
+:- lambda_const_add('OneZero',"Y(lfz.NIsZero(CDRz)z(NIsZero(CDRz)z(f<Npred(CARz)|Npred(CDRz)>)))").
+
+:- lambda_const_add('Zplus',"lxy.<Nplus(CARx)(CARy)|Nplus(CDRx)(CDRy)>").
+:- lambda_const_add('Zminus',"lxy.<Nplus(CARx)(CDRy)|Nplus(CDRx)(CARy)>").
+
+:- lambda_const_add('IsZero',"NIsZero").
+:- lambda_const_add('Value',"lmn.nm").
+
 :- lambda_const_add('Svar',"ln.<0N|n>").
 :- lambda_const_add('Sapp',"lab.<1N|<a|b>>").
 :- lambda_const_add('Slam',"lvw.<2N|<v|w>>").
