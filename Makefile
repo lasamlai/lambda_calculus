@@ -9,7 +9,7 @@ lambda_calculus: prolog/lambda_calculus.pl
 clear:
 	rm -f lambda_calculus
 
-install:
+install: lambda_calculus
 	$(INSTALL) -m 755 lambda_calculus $(prefix)/bin
 
 uninstall:
