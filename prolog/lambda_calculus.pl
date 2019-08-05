@@ -9,8 +9,17 @@
               reduction/2
           ]).
 
+:- use_module(library(readline)).
+
+:- volatile lambda_compile/0.
+
 lambda_compile:-
-    qsave_program(lambda_calculus,[goal(true),toplevel(main),stand_alone(true)]).
+    qsave_program(lambda_calculus,[goal(true),
+                                   toplevel(main),
+                                   stand_alone(true),
+                                   undefined(error),
+                                   foreign(save),
+                                   verbose(true)]).
 
 lambda_main(A):-
     main(A).
@@ -95,7 +104,6 @@ lambda(f(LL,B)):-
 */
 write_lambda(A):-
     copy_term(A,B),
-    %make_ground(B,[],_),
     write_lambda_(B,a,1).
 
 write_lambda_unlam(const(K),_,_):-
@@ -343,10 +351,14 @@ wyciongni([A|P]-PL,W,N-NL,[A|B]-BL):-
 
 read_lambda(L):-
     read_string(user_input, "\n", "\r", 10, S),
+    rl_add_history(S),
     string_lambda(S,L).
 
 string_lambda(S,LL):-
     string_codes(S,CC),
+    codes_lambda(CC,LL).
+
+codes_lambda(CC,LL):-
     phrase(lam(L),CC),!,
     lam_var(L,LL,[],[]).
 
@@ -516,6 +528,7 @@ lambda_const(A,B):-
     lambda_const_(A,B).
 */
 
+:- volatile lambda_const_add/2.
 
 lambda_const_add(Atom,String):-
     string_lambda(String,L),
@@ -526,6 +539,8 @@ lambda_const_add(Atom,String):-
     expand_term(lam_i_macros(Atom)-->SS,EE),
     assertz(EE).
 
+:- volatile find_/3.
+
 find_(A,F,F):-
     var(A),!.
 find_(l(_-A,K),[end(A)|F],L):-
@@ -533,6 +548,8 @@ find_(l(_-A,K),[end(A)|F],L):-
 find_(a(A,B),F,L):-
     find_(A,F,E),
     find_(B,E,L).
+
+:- volatile list_to_and/2.
 
 list_to_and([A],A):-!.
 list_to_and([A|B],(A,C)):-

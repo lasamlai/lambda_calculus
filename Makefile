@@ -4,7 +4,7 @@ INSTALL:= /usr/bin/install
 all: lambda_calculus
 
 lambda_calculus: prolog/lambda_calculus.pl
-	swipl -q -t lambda_compile prolog/lambda_calculus.pl
+	swipl -t lambda_compile prolog/lambda_calculus.pl
 
 clear:
 	rm -f lambda_calculus
