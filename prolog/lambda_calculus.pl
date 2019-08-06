@@ -102,6 +102,9 @@ lambda(f(LL,B)):-
     maplist(is_list,LL),
     lambda(B).
 */
+
+%!  write_lambda(Lambda) is det
+
 write_lambda(A):-
     copy_term(A,B),
     write_lambda_(B,a,1).
@@ -284,10 +287,6 @@ reduction(f(W,a(V,A)),f(R,a(V,B))):-
     !,
     reduction(f(W,A),f(R,B)).
 
-reduction(f(U,l(A,B)),f(K,l(AA,D))):-
-    !,
-    reduction(f([A|U],B),f([AA|K],D)).
-
 /* special */
 reduction(f(U,a(write,K)),f(U,l([C|A]-A, l(B-B, C)))):-
     !,
@@ -296,6 +295,10 @@ reduction(f(U,a(put_char,K)),f(U,l([C|A]-A, l(B-B, C)))):-
     !,
     lambda_n(K,N),
     put_char(N).
+
+reduction(f(U,l(A,B)),f(K,l(AA,D))):-
+    !,
+    reduction(f([A|U],B),f([AA|K],D)).
 
 reduction(A,C):-
     reduction_l(A,C),
@@ -528,6 +531,31 @@ lambda_const(A,B):-
     lambda_const_(A,B).
 */
 
+:- volatile lambda_add_close_Y/2.
+
+lambda_add_close_Y(Atom,String):-
+    string_lambda(String,L),
+    proc_reduction_(L,LL),
+    lambda_const('Y',Y),!,
+    reduction(f([],a(LL,Y)),f([],Lambda)),!,
+    lambda_const_add_(Atom,Lambda).
+
+:- volatile lambda_add_fix_close/3.
+
+lambda_add_fix_close(YAtom,Atom,String):-
+    string_lambda(String,L),
+    proc_reduction_(L,LL),
+    lambda_const_add_(Atom,LL),
+    lambda_const('Y',Y),!,
+    lambda_const_add_(YAtom,a(Y,LL)).
+
+:- volatile lambda_add_close/2.
+
+lambda_add_close(Atom,String):-
+    string_lambda(String,L),
+    proc_reduction_(L,LL),
+    lambda_const_add_(Atom,LL).
+
 :- volatile lambda_const_add/2.
 
 lambda_const_add(Atom,String):-
@@ -535,6 +563,16 @@ lambda_const_add(Atom,String):-
     find_(L,M,[]),
     list_to_and(M,F),
     assertz(:-(lambda_const(Atom,L),F)),
+    atom_string(Atom,SS),
+    expand_term(lam_i_macros(Atom)-->SS,EE),
+    assertz(EE).
+
+:- volatile lambda_const_add_/2.
+
+lambda_const_add_(Atom,Lambda):-
+    find_(Lambda,M,[]),
+    list_to_and(M,F),
+    assertz(:-(lambda_const(Atom,Lambda),F)),
     atom_string(Atom,SS),
     expand_term(lam_i_macros(Atom)-->SS,EE),
     assertz(EE).
@@ -558,6 +596,13 @@ list_to_and([A|B],(A,C)):-
 end(L):-
     var(L),!.
 end([]).
+
+member_eq(_,V):-
+    var(V),!,fail.
+member_eq(X,[H|_]):-
+    X == H,!.
+member_eq(X,[_|L]):-
+    member_eq(X,L).
 
 get_lambda_pair(l([B|A]-A, a(a(B,X),Y)),X,Y).
 
@@ -611,6 +656,8 @@ lambda_number_([F|K]-L,a(F,M),X,NN):-
 :- lambda_const_add('<>',"lx.x").
 :- lambda_const_add('Y',"lf.(lx.f(xx))(lx.f(xx))").
 
+:- lambda_const_add('Ninf',"lfx.Yf").
+
 :- lambda_const_add('[]',"l_a.a").
 :- lambda_const_add('FALSE',"l_x.x").
 :- lambda_const_add('TRUE',"lx_.x").
@@ -631,15 +678,15 @@ lambda_number_([F|K]-L,a(F,M),X,NN):-
 :- lambda_const_add('OR',"lpq.ppq").
 :- lambda_const_add('IsNil',"lw.w(lhtd.FALSE)TRUE").
 
-:- lambda_const_add('Nleq',"lmn.NIsZero(Nminusmn)").
-:- lambda_const_add('Neq',"lmn.AND(Nleqmn)(Nleqnm)").
+:- lambda_add_close('Nleq',"lmn.NIsZero(Nminusmn)").
+:- lambda_add_close('Neq',"lmn.AND(Nleqmn)(Nleqnm)").
 
 :- lambda_const_add('NtoZ',"ln.<n|0>").
-:- lambda_const_add('Zneg',"λa.[a([])|a(TRUE)]").
-:- lambda_const_add('OneZero',"Y(lfz.NIsZero(CDRz)z(NIsZero(CDRz)z(f<Npred(CARz)|Npred(CDRz)>)))").
+:- lambda_add_close('Zneg',"λz.<CDRz|CARz>").
+:- lambda_add_fix_close('OneZero','POneZero',"lfz.NIsZero(CDRz)z(NIsZero(CDRz)z(f<Npred(CARz)|Npred(CDRz)>))").
 
-:- lambda_const_add('Zplus',"lxy.<Nplus(CARx)(CARy)|Nplus(CDRx)(CDRy)>").
-:- lambda_const_add('Zminus',"lxy.<Nplus(CARx)(CDRy)|Nplus(CDRx)(CARy)>").
+:- lambda_add_close('Zplus',"lxy.<Nplus(CARx)(CARy)|Nplus(CDRx)(CDRy)>").
+:- lambda_add_close('Zminus',"lxy.<Nplus(CARx)(CDRy)|Nplus(CDRx)(CARy)>").
 
 :- lambda_const_add('IsZero',"NIsZero").
 :- lambda_const_add('Value',"lmn.nm").
@@ -648,12 +695,14 @@ lambda_number_([F|K]-L,a(F,M),X,NN):-
 :- lambda_const_add('Sapp',"lab.<1N|<a|b>>").
 :- lambda_const_add('Slam',"lvw.<2N|<v|w>>").
 %:- lambda_const_add('MAP',"Y(lfdi.(Neqi(dTRUETRUE))(dTRUE[])(f(d[])i))").
-:- lambda_const_add('NMap',"Y(lfdi.(IsNild)<[]|0>((Neqi(dTRUETRUE))<TRUE|dTRUE[]>(f(d[])i)))").
-:- lambda_const_add('EMap',"le.Y(lfdi.(IsNild)<[]|0>((ei(dTRUETRUE))<TRUE|dTRUE[]>(f(d[])i)))").
-:- lambda_const_add('NMember',"Y(lfdi.(IsNild)[]((Neqi(dTRUE))TRUE(f(d[])i)))").
-:- lambda_const_add('EMember',"le.Y(lfdi.(IsNild)[]((ei(dTRUE))TRUE(f(d[])i)))").
+:- lambda_add_fix_close('NMap','PNMap',"lfdi.(IsNild)<[]|i>((Neqi(dTRUETRUE))<TRUE|dTRUE[]>(f(d[])i))").
+:- lambda_add_close_Y('EMap',"ly.(le.y(lfdi.(IsNild)<[]|i>((ei(dTRUETRUE))<TRUE|dTRUE[]>(f(d[])i))))").
+:- lambda_add_fix_close('NMember','PNMember',"lfdi.(IsNild)[]((Neqi(dTRUE))TRUE(f(d[])i))").
+:- lambda_add_close_Y('EMember',"ly.(le.y(lfdi.(IsNild)[]((ei(dTRUE))TRUE(f(d[])i))))").
 %:- lambda_const_add('INT',"Y(lfdi.(Neq0(iTRUE))(MAPd(i[]))((Neq1(iTRUE))((fd(i[]TRUE))(fd(i[][])))(lx.f[<i[]TRUE|x>|d](i[]TRUE))))").
-:-  lambda_const_add('INT',"Y(lfdi.(NMap[<0|(NMapd(i[]))[]>,<1|(fd(i[]TRUE))(fd(i[][]))>,<2|lx.f[<i[]TRUE|x>|d](i[][])>](iTRUE))[])").
+:- lambda_add_close_Y('RINT',"ly.y(lfdi.((yPNMap)[<0|((yPNMap)d(i[]))[]>,<1|(fd(i[]TRUE))(fd(i[][]))>,<2|lx.f[<i[]TRUE|x>|d](i[][])>](iTRUE))[])").
+
+:- lambda_const_add('INT','RINT[]').
 
 :- compile_predicates([lambda_const/2,lam_i_macros//1]).
 
@@ -696,19 +745,13 @@ var_eq([F-_|_],A,[G-_|_],B):-
 var_eq([_|V1],A,[_|V2],B):-
     var_eq(V1,A,V2,B).
 
-member_eq(_,V):-
-    var(V),!,fail.
-member_eq(X,[H|_]):-
-    X == H,!.
-member_eq(X,[_|L]):-
-    member_eq(X,L).
 
+nazwa_zmien(z,'#1'):-!.
 nazwa_zmien(A,N):-
     atom_codes(A,[C]),!,
     between(97,121,C),
     succ(C,CC),
     atom_codes(N,[CC]).
-nazwa_zmien(z,'#1'):-!.
 nazwa_zmien(A,C):-
     atom_codes(A,[_|AA]),
     number_codes(N,AA),
