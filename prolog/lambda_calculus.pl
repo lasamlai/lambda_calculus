@@ -31,7 +31,7 @@ proc:-
 
 proc(A):-
     (   reduction(f([],A),f([],B))
-    ->  %write_lambda(B),nl,nl,
+    ->  debug(lambda_calculus,"~@\n\n",write_lambda(B)),
         proc(B)
     ;   nl,
         write_lambda(A),nl,
@@ -104,6 +104,7 @@ lambda(f(LL,B)):-
 %!  write_lambda(Lambda) is det
 
 write_lambda(A):-
+    format("\e[39m"),
     \+ \+ write_lambda_(A,a,1).
 
 write_lambda_(L,Z,R):-
@@ -346,7 +347,7 @@ wyciongni([A|P]-PL,W,N-NL,[A|B]-BL):-
 read_lambda(L):-
     read_string(user_input, "\n", "\r", 10, S),
     string_to_atom(S,A),
-    rl_add_history(A),
+    ignore(rl_add_history(A)),
     string_lambda(S,L).
 
 string_lambda(S,LL):-
