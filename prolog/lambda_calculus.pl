@@ -37,7 +37,7 @@ proc:-
 
 proc(A):-
     (   reduction(f([],A),f([],B))
-    ->  debug(lambda_calculus,"~@\n\n",write_lambda(B)),
+    ->  debug(lambda_calculus,"~@\n",write_lambda(B)),
         proc(B)
     ;   nl,
         write_lambda(A),nl,
@@ -225,6 +225,8 @@ witch_lambda_const_(L,int(Z,K)):-
     lambda_n(B,M),!,
     Z is N - M,
     K is min(N,M).
+witch_lambda_const_(L, enum(Z,K)):-
+    lambda_enum(L,Z,K,p).
 witch_lambda_const_(L,list([H|T])):-
     is_lambda_pair(L,H,Y),!,
     witch_lambda_list(Y,T).
@@ -403,10 +405,11 @@ lam_t(A,T) --> lam_i(B),(lam_t(a(A,B),T);{T=a(A,B)}).
 %       | l_var
 %```
 
-lam_i(nat(N)) --> number(N),"N".
-lam_i(int(N,M)) --> number(N),"Z",number(M).
-lam_i(int(N,0)) --> number(N),"Z".
-lam_i(nat(N)) --> number(N).
+lam_i(nat(N)) --> integer(N),"N".
+lam_i(int(N,M)) --> integer(N),"Z",integer(M).
+lam_i(enum(N,M)) --> integer(N),"E",integer(M).
+lam_i(int(N,0)) --> integer(N),"Z".
+lam_i(nat(N)) --> integer(N).
 lam_i('Y') --> "Y".
 lam_i('write') --> "write".
 lam_i('put_char') --> "put_char".
@@ -472,6 +475,9 @@ lam_var(int(N,M),L,P,P):-
     lambda_number(NL,N1),
     lambda_number(NP,N2),
     get_lambda_pair(L,NL,NP).
+lam_var(enum(Z,K),L,P,P):-
+    !,
+    lambda_enum(L,Z,K,g).
 lam_var(pair(V,W),l([B|A]-A, a(a(B, X), Y)),R,P):-
     !,
     lam_var(V,X,R,E),
@@ -633,6 +639,37 @@ lambda_n2(F,X,a(FF,A),N):-
     member_eq(FF,F),
     lambda_n2(F,X,A,NN),
     succ(NN,N).
+
+lambda_enum(L,Z,K,C):-
+    lambda_enum_1(L,Z,K,C).
+
+lambda_enum_1(V,_,_,p):-
+    var(V),!,fail.
+lambda_enum_1(l([A|H]-HH,R),0,KK,C):-
+    (   C = g
+    ->  H = HH
+    ;   H == HH),
+    !,
+    lsucc(K,KK),
+    lambda_enum_2(A,R,K,C).
+lambda_enum_1(l(H-HH,R),ZZ,KK,C):-
+    (   C = g
+    ->  H = HH
+    ;   H == HH),
+    lsucc(K,KK),
+    lsucc(Z,ZZ),
+    lambda_enum_1(R,Z,K,C).
+
+lambda_enum_2(A,AA,0,g):-
+    A = AA,!.
+lambda_enum_2(A,AA,0,p):-
+    A == AA,!.
+lambda_enum_2(A,l(H-H,R), KK,C):-
+    lsucc(K,KK),
+    lambda_enum_2(A,R,K,C).
+
+lsucc(N,M):-
+    when((nonvar(N);nonvar(M)),system:succ(N,M)).
 
 %!  lambda_number(?Lambda,?Number) is det
 
