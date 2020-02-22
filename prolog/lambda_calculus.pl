@@ -12,18 +12,24 @@
 :- volatile lambda_compile/0.
 
 lambda_compile:-
-    qsave_program(lambda_calculus,[goal(true),
-                                   toplevel(main),
-                                   stand_alone(true),
-                                   undefined(error),
-                                   foreign(save),
-                                   verbose(true)]).
+    qsave_program(lambda_calculus,[
+                      goal(true),
+                      toplevel(main),
+                      stand_alone(true),
+                      undefined(error),
+                      foreign(save),
+                      verbose(true)
+                  ]).
 
 lambda_main(A):-
     main(A).
 
-main(_):-
+main([_|P]):-
+    arg_parse(P,[]),
     proc.
+
+arg_parse --> ['-d'],!,{debug(lambda_calculus)}, arg_parse.
+arg_parse --> [].
 
 proc:-
     read_lambda(A),!,
@@ -247,6 +253,9 @@ write_lambda_unlam(int(N,0),_,_):-
 write_lambda_unlam(int(N,K),_,_):-
     !,
     format("(\e[36m~dZ~d\e[39m)",[N,K]).
+write_lambda_unlam(enum(N,K),_,_):-
+    !,
+    format("(\e[36m~dE~d\e[39m)",[N,K]).
 
 write_lambda_unlam(list([X|Y]),Z,R):-
     !,
