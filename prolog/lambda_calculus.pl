@@ -110,8 +110,8 @@ lambda(f(LL,B)):-
 %!  write_lambda(Lambda) is det
 
 write_lambda(A):-
-    format("\e[39m"),
-    \+ \+ write_lambda_(A,a,1).
+    \+ \+ write_lambda_(A,a,1),
+    format("\e[39m").
 
 write_lambda_(L,Z,R):-
     witch_lambda_const_(L,K),
@@ -120,7 +120,7 @@ write_lambda_(L,Z,R):-
 
 write_lambda_(A,_,_):-
     var(A),!,
-    format("\e[92m~w\e[39m",[A]).
+    format("\e[92m~w",[A]).
 
 write_lambda_(l(L1-L2,B),Z,R):-
     L1 == L2,
@@ -140,38 +140,38 @@ write_lambda_(a(A,C),Z,R):-
     write_lambda_k(C,Z,R).
 
 write_lambda_(A,_,_):-
-    format("\e[92m~w\e[39m",[A]).
+    format("\e[92m~w",[A]).
 
 % Nawiasuje lambde
 
 write_lambda_n(l(K,W),Z,R):-
     !,
-    format("\e[38;5;~dm(\e[39m",[R]),
+    format("\e[38;5;~dm(",[R]),
     next_color(R,RR),
     write_lambda_(l(K,W),Z,RR),
-    format("\e[38;5;~dm)\e[39m",[R]).
+    format("\e[38;5;~dm)",[R]).
 write_lambda_n(A,Z,R):-
     write_lambda_(A,Z,R).
 
 % Nawiasuje Aplikacje i lambda
 write_lambda_k(l(K,W),Z,R):-
     !,
-    format("\e[38;5;~dm(\e[39m",[R]),
+    format("\e[38;5;~dm(",[R]),
     next_color(R,RR),
     write_lambda_(l(K,W),Z,RR),
-    format("\e[38;5;~dm)\e[39m",[R]).
+    format("\e[38;5;~dm)",[R]).
 write_lambda_k(a(K,W),Z,R):-
     !,
-    format("\e[38;5;~dm(\e[39m",[R]),
+    format("\e[38;5;~dm(",[R]),
     next_color(R,RR),
     write_lambda_(a(K,W),Z,RR),
-    format("\e[38;5;~dm)\e[39m",[R]).
+    format("\e[38;5;~dm)",[R]).
 write_lambda_k(A,Z,R):-
     write_lambda_(A,Z,R).
 
 write_lambda_l(L,Z,R):-
     witch_lambda_const_(L,K),!,
-    format("\e[91m.\e[39m"),
+    format("\e[91m."),
     write_lambda_unlam(K,Z,R).
 /*
 write_lambda_l(L):-
@@ -190,29 +190,29 @@ write_lambda_l(l(L-[],B),Z,R):-
     format("\e[34m~w",[Z]),
     write_lambda_l(B,ZZ,R).
 write_lambda_l(A,Z,R):-
-    format("\e[91m.\e[39m"),
+    format("\e[91m."),
     write_lambda_(A,Z,R).
 
 write_lambda_krot([],_,_):-
-    format("\e[93m>\e[39m").
+    format("\e[93m>").
 write_lambda_krot([A|B],Z,R):-
-    format("\e[93m|\e[39m"),
+    format("\e[93m|"),
     write_lambda_(A,Z,R),
     write_lambda_krot(B,Z,R).
 
 write_lambda_list([],_,_):-
     !,
-    format("\e[93m]\e[39m").
+    format("\e[93m]").
 write_lambda_list([A|B],Z,R):-
     !,
-    format("\e[93m,\e[39m"),
+    format("\e[93m,"),
     write_lambda_(A,Z,R),
     write_lambda_list(B,Z,R).
 write_lambda_list(A,Z,R):-
     !,
-    format("\e[93m|\e[39m"),
+    format("\e[93m|"),
     write_lambda_(A,Z,R),
-    format("\e[93m]\e[39m").
+    format("\e[93m]").
 
 witch_lambda_const_(L,const(K)):-
     lambda_const(K,LL),
@@ -243,38 +243,38 @@ witch_lambda_list(A,A).
 
 write_lambda_unlam(const(K),_,_):-
     !,
-    format("\e[93m~w\e[39m",[K]).
+    format("\e[93m~w",[K]).
 write_lambda_unlam(nat(N),_,_):-
     !,
-    format("(\e[36m~dN\e[39m)",[N]).
+    format("\e[39m(\e[36m~dN\e[39m)",[N]).
 write_lambda_unlam(int(N,0),_,_):-
     !,
-    format("(\e[36m~dZ\e[39m)",[N]).
+    format("\e[39m(\e[36m~dZ\e[39m)",[N]).
 write_lambda_unlam(int(N,K),_,_):-
     !,
-    format("(\e[36m~dZ~d\e[39m)",[N,K]).
+    format("\e[39m(\e[36m~dZ~d\e[39m)",[N,K]).
 write_lambda_unlam(enum(N,K),_,_):-
     !,
-    format("(\e[36m~dE~d\e[39m)",[N,K]).
+    format("\e[39m(\e[36m~dE~d\e[39m)",[N,K]).
 
 write_lambda_unlam(list([X|Y]),Z,R):-
     !,
-    format("\e[93m[\e[39m"),
+    format("\e[93m["),
     write_lambda_(X,Z,R),
     write_lambda_list(Y,Z,R).
 write_lambda_unlam(pair(X,Y),A,R):-
     !,
-    format("\e[93m<\e[39m"),
+    format("\e[93m<"),
     write_lambda_(X,A,R),
-    format("\e[93m|\e[39m"),
+    format("\e[93m|"),
     write_lambda_(Y,A,R),
-    format("\e[93m>\e[39m").
+    format("\e[93m>").
 write_lambda_unlam(krot(K),Z,R):-
     !,
     (   K = []
-    ->  format("\e[93m<>\e[39m")
+    ->  format("\e[93m<>")
     ;   K = [A|B],
-        format("\e[93m<\e[39m"),
+        format("\e[93m<"),
         write_lambda_(A,Z,R),
         write_lambda_krot(B,Z,R)).
 
