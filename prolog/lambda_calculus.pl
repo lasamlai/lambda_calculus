@@ -227,6 +227,10 @@ witch_lambda_const_(L,int(Z,K)):-
     K is min(N,M).
 witch_lambda_const_(L, enum(Z,K)):-
     lambda_enum(L,Z,K,p).
+witch_lambda_const_(L, bite(N,B)):-
+    is_lambda_krot(L,K),
+    length(K,B),
+    num_bite(K,N).
 witch_lambda_const_(L,list([H|T])):-
     is_lambda_pair(L,H,Y),!,
     witch_lambda_list(Y,T).
@@ -258,6 +262,9 @@ write_lambda_unlam(int(N,K),_,_):-
 write_lambda_unlam(enum(N,K),_,_):-
     !,
     format("\e[39m(\e[36m~dE~d\e[39m)",[N,K]).
+write_lambda_unlam(bite(N,K),_,_):-
+    !,
+    format("\e[39m(\e[36m~dB~d\e[39m)",[N,K]).
 
 write_lambda_unlam(list([X|Y]),Z,R):-
     !,
@@ -408,6 +415,7 @@ lam_t(A,T) --> lam_i(B),(lam_t(a(A,B),T);{T=a(A,B)}).
 lam_i(nat(N)) --> integer(N),"N".
 lam_i(int(N,M)) --> integer(N),"Z",integer(M).
 lam_i(enum(N,M)) --> integer(N),"E",integer(M).
+lam_i(bite(N,M)) --> integer(N),"B",integer(M).
 lam_i(int(N,0)) --> integer(N),"Z".
 lam_i(nat(N)) --> integer(N).
 lam_i('Y') --> "Y".
@@ -478,6 +486,9 @@ lam_var(int(N,M),L,P,P):-
 lam_var(enum(Z,K),L,P,P):-
     !,
     lambda_enum(L,Z,K,g).
+lam_var(bite(Z,K),L,P,P):-
+    !,
+    num_bite_p(L,Z,K).
 lam_var(pair(V,W),l([B|A]-A, a(a(B, X), Y)),R,P):-
     !,
     lam_var(V,X,R,E),
@@ -692,6 +703,40 @@ lambda_number_([F|K]-L,a(F,M),X,NN):-
 lambda_number_([F|K]-L,a(F,M),X,NN):-
     lambda_number_(K-L,M,X,N),
     succ(N,NN).
+
+num_bite(L,B):-
+    num_bite_(L, 0, B).
+num_bite_([], A, A).
+num_bite_([H|T], W, L) :-
+    lambda_const('TRUE', H),
+    WW is W * 2 + 1,
+    num_bite_(T, WW, L).
+num_bite_([H|T], W, L) :-
+    lambda_const('FALSE', H),
+    WW is W * 2,
+    num_bite_(T, WW, L).
+
+num_bite_p(F,B,Z):-
+    num_bite_p_(B, [], L, Z),
+    lam_var(krot(L),F,[],[]).
+num_bite_p_(0, T, L, Z) :-
+    !,
+    num_bite_p_zeros(Z, T, L).
+num_bite_p_(W, T, L, Z) :-
+    1 is W mod 2,
+    !,
+    WW is W div 2,
+    succ(ZZ, Z),
+    num_bite_p_(WW, ['TRUE'|T], L, ZZ).
+num_bite_p_(W, T, L, Z) :-
+    WW is W div 2,
+    succ(ZZ, Z),
+    num_bite_p_(WW, ['FALSE'|T], L, ZZ).
+
+num_bite_p_zeros(0, L, L) :- !.
+num_bite_p_zeros(Z, T, L) :-
+    succ(ZZ, Z),
+    num_bite_p_zeros(ZZ, ['FALSE'|T], L).
 
 :- dynamic lambda_const/2.
 :- dynamic lam_i_macros//1.
