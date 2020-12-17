@@ -1,9 +1,10 @@
 prefix := /usr/local
 INSTALL:= /usr/bin/install
+PRG    := $(shell ls prolog/*.pl)
 
 all: lambda_calculus
 
-lambda_calculus: prolog/lambda_calculus.pl
+lambda_calculus: $(PRG)
 	swipl -t lambda_compile prolog/lambda_calculus.pl
 
 clear:
