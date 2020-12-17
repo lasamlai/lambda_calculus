@@ -11,6 +11,10 @@
 :- use_module(reduction).
 :- use_module(semantic).
 
+% Magic line witch remowe odd warning
+% see: https://github.com/evoldoers/biomake/issues/31
+user:message_hook(debug_no_topic(_Topic), _Type, _Lines).
+
 :- volatile lambda_compile/0.
 
 lambda_compile:-
@@ -26,7 +30,7 @@ lambda_compile:-
 lambda_main(A):-
     main(A).
 
-main([_|P]):-
+main(P):-
     arg_parse(P,[]),
     proc.
 
