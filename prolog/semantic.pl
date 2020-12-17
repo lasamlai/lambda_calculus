@@ -353,13 +353,19 @@ num_bite_p_zeros(Z, T, L) :-
 
 %!  lambda_eq(Vars1,L1,Vars2,L2) is det
 
+lambda_eq(_,A,_,B):-
+    atom(A),atom(B),
+    !,
+    A = B.
 lambda_eq(V1,A,V2,B):-
-    (var(A);atom(A)),
-    (   var(B)
-    ->  var_eq(V1,A,V2,B)
-    ;   !,fail).
+    var(A),
+    !,
+    var(B),
+    var_eq(V1,A,V2,B).
 lambda_eq(_,_,_,B):-
-    var(B),!,fail.
+    var(B),
+    !,
+    fail.
 
 lambda_eq(V1,a(A,B),V2,a(C,D)):-
     lambda_eq(V1,A,V2,C),
@@ -369,8 +375,7 @@ lambda_eq(V1,l(F,A),V2,l(G,B)):-
 
 var_eq([F-_|_],A,[G-_|_],B):-
     member_eq(A,F),
-    (   member_eq(B,G)
-    ->  true
-    ;   !,fail).
+    !,
+    member_eq(B,G).
 var_eq([_|V1],A,[_|V2],B):-
     var_eq(V1,A,V2,B).

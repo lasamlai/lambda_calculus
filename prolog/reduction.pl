@@ -3,6 +3,8 @@
               proc_reduction_/2
           ]).
 
+:- use_module(semantic, [lambda_eq/4]).
+
 proc_reduction_(A,C):-
     reduction(f([],A),f([],B)),!,
     proc_reduction_(B,C).
@@ -45,6 +47,11 @@ reduction(A,C):-
 reduction(A,C):-
     reduction_a(A,C).
 
+reduction(f(U,a(a('EQ',L1),L2)), f(U, LL)):-
+    !,
+    (   lambda_eq([], L1, [], L2)
+    ->  LL = l([C|A]-A, l(B-B, C))
+    ;   LL = l(A-A, l([C|B]-B, C))).
 
 /* main party */
 reduction_l(f(U,a(l(W-[],C),A)),f(WW,C)):-
