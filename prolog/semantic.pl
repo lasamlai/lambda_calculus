@@ -3,9 +3,13 @@
               lambda_enum/4,
               lambda_n/2,
               lambda_const/2,
+              lam_i_macros//1,
               lambda_eq/4,
               num_bite/2
           ]).
+
+:- abolish(parser:lam_i_macros/3).
+:- dynamic lam_i_macros//1.
 
 :- use_module(parser).
 :- use_module(reduction).
@@ -270,7 +274,35 @@ num_bite_p_zeros(Z, T, L) :-
     succ(ZZ, Z),
     num_bite_p_zeros(ZZ, ['FALSE'|T], L).
 
+%!  lambda_eq(Vars1,L1,Vars2,L2) is det
 
+lambda_eq(_,A,_,B):-
+    atom(A),atom(B),
+    !,
+    A = B.
+lambda_eq(V1,A,V2,B):-
+    var(A),
+    !,
+    var(B),
+    var_eq(V1,A,V2,B).
+lambda_eq(_,_,_,B):-
+    var(B),
+    !,
+    fail.
+lambda_eq(V1,a(A,B),V2,a(C,D)):-
+    lambda_eq(V1,A,V2,C),
+    lambda_eq(V1,B,V2,D).
+lambda_eq(V1,l(F,A),V2,l(G,B)):-
+    lambda_eq([F|V1],A,[G|V2],B).
+
+var_eq([F-_|_],A,[G-_|_],B):-
+    member_eq(A,F),
+    !,
+    member_eq(B,G).
+var_eq([_|V1],A,[_|V2],B):-
+    var_eq(V1,A,V2,B).
+
+:- abolish(lambda_const/2).
 :- dynamic lambda_const/2.
 
 :- lambda_const_add('<>',"lx.x").
@@ -350,32 +382,3 @@ num_bite_p_zeros(Z, T, L) :-
  * @test INT[](Slam1(Sapp(Svar1)(Svar1)))
  * la.aa
  */
-
-%!  lambda_eq(Vars1,L1,Vars2,L2) is det
-
-lambda_eq(_,A,_,B):-
-    atom(A),atom(B),
-    !,
-    A = B.
-lambda_eq(V1,A,V2,B):-
-    var(A),
-    !,
-    var(B),
-    var_eq(V1,A,V2,B).
-lambda_eq(_,_,_,B):-
-    var(B),
-    !,
-    fail.
-
-lambda_eq(V1,a(A,B),V2,a(C,D)):-
-    lambda_eq(V1,A,V2,C),
-    lambda_eq(V1,B,V2,D).
-lambda_eq(V1,l(F,A),V2,l(G,B)):-
-    lambda_eq([F|V1],A,[G|V2],B).
-
-var_eq([F-_|_],A,[G-_|_],B):-
-    member_eq(A,F),
-    !,
-    member_eq(B,G).
-var_eq([_|V1],A,[_|V2],B):-
-    var_eq(V1,A,V2,B).

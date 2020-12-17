@@ -1,11 +1,10 @@
 :- module(parser, [
-              lam//1,
-              lam_i_macros//1
+              lam//1
           ]).
 
-:- dynamic lam_i_macros//1.
 
 :- use_module(library(dcg/basics)).
+:- use_module(semantic,[lam_i_macros//1]).
 
 % Parsing
 %
