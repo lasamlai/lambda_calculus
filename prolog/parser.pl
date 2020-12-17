@@ -23,7 +23,7 @@ lam(A) --> lam_t(A).
 %       | lam_i lam_t2
 %```
 
-lam_t(T) --> lam_i(A),(lam_t(A,T);{T=A}).
+lam_t(T) --> lam_i(A),whites,(lam_t(A,T);{T=A}).
 
 %```
 %lam_t2 :=
@@ -31,7 +31,7 @@ lam_t(T) --> lam_i(A),(lam_t(A,T);{T=A}).
 %        | lam_i lam_t2
 %```
 
-lam_t(A,T) --> lam_i(B),(lam_t(a(A,B),T);{T=a(A,B)}).
+lam_t(A,T) --> lam_i(B),whites,(lam_t(a(A,B),T);{T=a(A,B)}).
 
 %```
 %lam_i :=
