@@ -47,7 +47,8 @@ reduction(A,C):-
 reduction(A,C):-
     reduction_a(A,C).
 
-reduction(f(U,a(a('EQ',L1),L2)), f(U, LL)):-
+reduction(f(U,a(a(EQ,L1),L2)), f(U, LL)):-
+    EQ == 'EQ',
     !,
     (   lambda_eq([], L1, [], L2)
     ->  LL = l([C|A]-A, l(B-B, C))
