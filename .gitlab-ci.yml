@@ -1,0 +1,43 @@
+default:
+    image: swipl:stable
+
+build-job:
+  stage: build
+  script:
+    - echo "Hello, $GITLAB_USER_LOGIN!"
+    - make
+
+test-nat:
+  stage: test
+  script:
+    - echo "This job tests something"
+    - test $(echo "0N" | ./lambda_calculus) == $(echo "(0N)" | ./lambda_calculus)
+    - test $(echo "1N" | ./lambda_calculus) == $(echo "(1N)" | ./lambda_calculus)
+    - test $(echo "2N" | ./lambda_calculus) == $(echo "(2N)" | ./lambda_calculus)
+    - test $(echo "3N" | ./lambda_calculus) == $(echo "(3N)" | ./lambda_calculus)
+    - test $(echo "4N" | ./lambda_calculus) == $(echo "(4N)" | ./lambda_calculus)
+
+test-id:
+  stage: test
+  script:
+    - echo "This job tests something"
+    - test $(echo "lx.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "la.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "\\x.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "\\a.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "λx.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "λa.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+
+test-id2:
+  stage: test
+  script:
+    - test $(echo "<>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "<><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "<><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "<><><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "<><><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+
+deploy-prod:
+  stage: deploy
+  script:
+    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
