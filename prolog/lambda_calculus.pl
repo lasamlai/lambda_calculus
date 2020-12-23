@@ -39,16 +39,19 @@ arg_parse --> [].
 
 proc:-
     read_lambda(A),!,
-    proc(A).
+    fix_reduction(A, C),
+    nl,
+    write_lambda(C),
+    nl,
+    proc.
 
-proc(A):-
-    (   reduction(f([],A),f([],B))
-    ->  debug(lambda_calculus,"~@\n",write_lambda(B)),
-        proc(B)
-    ;   nl,
-        write_lambda(A),nl,
-        proc
-    ).
+fix_reduction(A, C):-
+    reduction(f([],A),f([],B)),
+    !,
+    debug(lambda_calculus,"~@\n",write_lambda(B)),
+    fix_reduction(B, C).
+
+fix_reduction(A, A).
 
 proc_string(S):-
     string_lambda(S,L),
