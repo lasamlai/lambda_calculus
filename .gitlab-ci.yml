@@ -1,11 +1,21 @@
 default:
     image: swipl:stable
 
+before_script:
+  - swipl --version
+  - ls -l
+
 build-job:
   stage: build
+  before_script:
+    - apt-get update
+    - apt-get install make
   script:
     - echo "Hello, $GITLAB_USER_LOGIN!"
     - make
+  artifacts:
+    paths:
+      - lambda_calculus
 
 test-nat:
   stage: test
