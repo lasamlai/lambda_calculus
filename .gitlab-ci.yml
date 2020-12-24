@@ -59,11 +59,11 @@ test-nat_succ:
 test-zal:
   stage: test
   script:
-    - test $(echo "-2N" | ./lambda_calculus) == $(echo "(-2N)" | ./lambda_calculus)
-    - test $(echo "-1Z" | ./lambda_calculus) == $(echo "(-1N)" | ./lambda_calculus)
-    - test $(echo "0Z" | ./lambda_calculus) == $(echo "(0N)" | ./lambda_calculus)
-    - test $(echo "1Z" | ./lambda_calculus) == $(echo "(1N)" | ./lambda_calculus)
-    - test $(echo "2N" | ./lambda_calculus) == $(echo "(2N)" | ./lambda_calculus)
+    - test $(echo "-2Z" | ./lambda_calculus) == $(echo "(-2Z)" | ./lambda_calculus)
+    - test $(echo "-1Z" | ./lambda_calculus) == $(echo "(-1Z)" | ./lambda_calculus)
+    - test $(echo "0Z" | ./lambda_calculus) == $(echo "(0Z)" | ./lambda_calculus)
+    - test $(echo "1Z" | ./lambda_calculus) == $(echo "(1Z)" | ./lambda_calculus)
+    - test $(echo "2Z" | ./lambda_calculus) == $(echo "(2Z)" | ./lambda_calculus)
 
 test-id:
   stage: test
