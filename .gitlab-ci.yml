@@ -89,7 +89,7 @@ test-id:
 
 test-id2:
   stage: test
-  need: [test-id]
+  needs: [test-id]
   script:
     - test $(echo "<>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
     - test $(echo "<><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
