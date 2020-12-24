@@ -3,7 +3,10 @@ default:
 
 stages:
   - build
-  - test
+  - test_syntax
+  - test_base
+  - test_complex
+  - test_function
 
 before_script:
   - swipl --version
@@ -22,7 +25,7 @@ build-job:
       - lambda_calculus
 
 test-app:
-  stage: test
+  stage: test_base
   script:
     - test $(echo "(lx.x) a" | ./lambda_calculus) == $(echo "a" | ./lambda_calculus)
     - test $(echo "(lx.xx) a" | ./lambda_calculus) == $(echo "aa" | ./lambda_calculus)
@@ -32,7 +35,7 @@ test-app:
     - test $(echo "lx.(lx.(lx.xx)xx)x" | ./lambda_calculus) == $(echo "lx.xxx" | ./lambda_calculus)
 
 test-nat:
-  stage: test
+  stage: test_syntax
   script:
     - test $(echo "0N" | ./lambda_calculus) == $(echo "(0N)" | ./lambda_calculus)
     - test $(echo "1N" | ./lambda_calculus) == $(echo "(1N)" | ./lambda_calculus)
@@ -41,7 +44,7 @@ test-nat:
     - test $(echo "4N" | ./lambda_calculus) == $(echo "(4N)" | ./lambda_calculus)
 
 test-nat_succ:
-  stage: test
+  stage: test_base
   needs: [test-nat]
   script:
     - test $(echo "(lnfx.f(nfx))0N" | ./lambda_calculus) == $(echo "(1N)" | ./lambda_calculus)
@@ -58,8 +61,8 @@ test-nat_succ:
     - test $(echo "(lnfx.nf(fx))100N" | ./lambda_calculus) == $(echo "(101N)" | ./lambda_calculus)
 
 test-nat_add:
-  stage: test
-  needs: [test-add]
+  stage: test_complex
+  needs: [test-nat_succ]
   script:
     - test $(echo "(lnmfx.nf(mfx)) 12N 13N" | ./lambda_calculus) == $(echo "25N" | ./lambda_calculus)
     - test $(echo "(lnmfx.nf(mfx)) 10N 15N" | ./lambda_calculus) == $(echo "25N" | ./lambda_calculus)
@@ -69,7 +72,7 @@ test-nat_add:
     - test $(echo "(lnmfx.nf(mfx)) 0N 0N" | ./lambda_calculus) == $(echo "0N" | ./lambda_calculus)
 
 test-zal:
-  stage: test
+  stage: test_syntax
   script:
     - test $(echo "-2Z" | ./lambda_calculus) == $(echo "(-2Z)" | ./lambda_calculus)
     - test $(echo "-1Z" | ./lambda_calculus) == $(echo "(-1Z)" | ./lambda_calculus)
@@ -78,7 +81,7 @@ test-zal:
     - test $(echo "2Z" | ./lambda_calculus) == $(echo "(2Z)" | ./lambda_calculus)
 
 test-id:
-  stage: test
+  stage: test_syntax
   script:
     - test $(echo "lx.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
     - test $(echo "la.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
@@ -88,7 +91,7 @@ test-id:
     - test $(echo "λa.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
 
 test-id2:
-  stage: test
+  stage: test_base
   needs: [test-id]
   script:
     - test $(echo "<>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
