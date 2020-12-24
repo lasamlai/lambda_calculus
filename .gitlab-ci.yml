@@ -44,7 +44,7 @@ test-id2:
     - test $(echo "<>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
     - test $(echo "<><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
     - test $(echo "<><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - false
+    - "false"
     - test $(echo "<><><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
     - test $(echo "<><><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
 
