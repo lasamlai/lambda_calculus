@@ -1,6 +1,10 @@
 default:
     image: swipl:stable
 
+stages:
+  - build
+  - test
+
 before_script:
   - swipl --version
   - ls -l
@@ -17,20 +21,53 @@ build-job:
     paths:
       - lambda_calculus
 
+test-app:
+  stage: test
+  script:
+    - test $(echo "(lx.x) a" | ./lambda_calculus) == $(echo "a" | ./lambda_calculus)
+    - test $(echo "(lx.xx) a" | ./lambda_calculus) == $(echo "aa" | ./lambda_calculus)
+    - test $(echo "lx.(lx.x)x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "la.(lx.xx)a" | ./lambda_calculus) == $(echo "lx.xx" | ./lambda_calculus)
+    - test $(echo "lx.(lx.xx)x" | ./lambda_calculus) == $(echo "lx.xx" | ./lambda_calculus)
+    - test $(echo "lx.(lx.(lx.xx)xx)x" | ./lambda_calculus) == $(echo "lx.xxx" | ./lambda_calculus)
+
 test-nat:
   stage: test
   script:
-    - echo "This job tests something"
     - test $(echo "0N" | ./lambda_calculus) == $(echo "(0N)" | ./lambda_calculus)
     - test $(echo "1N" | ./lambda_calculus) == $(echo "(1N)" | ./lambda_calculus)
     - test $(echo "2N" | ./lambda_calculus) == $(echo "(2N)" | ./lambda_calculus)
     - test $(echo "3N" | ./lambda_calculus) == $(echo "(3N)" | ./lambda_calculus)
     - test $(echo "4N" | ./lambda_calculus) == $(echo "(4N)" | ./lambda_calculus)
 
+test-nat_succ:
+  stage: test
+  script:
+    - test $(echo "(lnfx.f(nfx))0N" | ./lambda_calculus) == $(echo "(1N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))0N" | ./lambda_calculus) == $(echo "(1N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.f(nfx))1N" | ./lambda_calculus) == $(echo "(2N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))1N" | ./lambda_calculus) == $(echo "(2N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.f(nfx))2N" | ./lambda_calculus) == $(echo "(3N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))2N" | ./lambda_calculus) == $(echo "(3N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.f(nfx))3N" | ./lambda_calculus) == $(echo "(4N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))3N" | ./lambda_calculus) == $(echo "(4N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.f(nfx))10N" | ./lambda_calculus) == $(echo "(11N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))10N" | ./lambda_calculus) == $(echo "(11N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.f(nfx))100N" | ./lambda_calculus) == $(echo "(101N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))100N" | ./lambda_calculus) == $(echo "(101N)" | ./lambda_calculus)
+
+test-zal:
+  stage: test
+  script:
+    - test $(echo "-2N" | ./lambda_calculus) == $(echo "(-2N)" | ./lambda_calculus)
+    - test $(echo "-1Z" | ./lambda_calculus) == $(echo "(-1N)" | ./lambda_calculus)
+    - test $(echo "0Z" | ./lambda_calculus) == $(echo "(0N)" | ./lambda_calculus)
+    - test $(echo "1Z" | ./lambda_calculus) == $(echo "(1N)" | ./lambda_calculus)
+    - test $(echo "2N" | ./lambda_calculus) == $(echo "(2N)" | ./lambda_calculus)
+
 test-id:
   stage: test
   script:
-    - echo "This job tests something"
     - test $(echo "lx.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
     - test $(echo "la.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
     - test $(echo "\\x.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
@@ -44,11 +81,5 @@ test-id2:
     - test $(echo "<>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
     - test $(echo "<><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
     - test $(echo "<><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - "false"
     - test $(echo "<><><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
     - test $(echo "<><><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-
-deploy-prod:
-  stage: deploy
-  script:
-    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
