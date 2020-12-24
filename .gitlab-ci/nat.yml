@@ -1,0 +1,36 @@
+test-nat:
+  stage: test_syntax
+  script:
+    - test $(echo "0N" | ./lambda_calculus) == $(echo "(0N)" | ./lambda_calculus)
+    - test $(echo "1N" | ./lambda_calculus) == $(echo "(1N)" | ./lambda_calculus)
+    - test $(echo "2N" | ./lambda_calculus) == $(echo "(2N)" | ./lambda_calculus)
+    - test $(echo "3N" | ./lambda_calculus) == $(echo "(3N)" | ./lambda_calculus)
+    - test $(echo "4N" | ./lambda_calculus) == $(echo "(4N)" | ./lambda_calculus)
+
+test-nat_succ:
+  stage: test_base
+  needs: [test-nat]
+  script:
+    - test $(echo "(lnfx.f(nfx))0N" | ./lambda_calculus) == $(echo "(1N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))0N" | ./lambda_calculus) == $(echo "(1N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.f(nfx))1N" | ./lambda_calculus) == $(echo "(2N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))1N" | ./lambda_calculus) == $(echo "(2N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.f(nfx))2N" | ./lambda_calculus) == $(echo "(3N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))2N" | ./lambda_calculus) == $(echo "(3N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.f(nfx))3N" | ./lambda_calculus) == $(echo "(4N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))3N" | ./lambda_calculus) == $(echo "(4N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.f(nfx))10N" | ./lambda_calculus) == $(echo "(11N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))10N" | ./lambda_calculus) == $(echo "(11N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.f(nfx))100N" | ./lambda_calculus) == $(echo "(101N)" | ./lambda_calculus)
+    - test $(echo "(lnfx.nf(fx))100N" | ./lambda_calculus) == $(echo "(101N)" | ./lambda_calculus)
+
+test-nat_add:
+  stage: test_complex
+  needs: [test-nat_succ]
+  script:
+    - test $(echo "(lnmfx.nf(mfx)) 12N 13N" | ./lambda_calculus) == $(echo "25N" | ./lambda_calculus)
+    - test $(echo "(lnmfx.nf(mfx)) 10N 15N" | ./lambda_calculus) == $(echo "25N" | ./lambda_calculus)
+    - test $(echo "(lnmfx.nf(mfx)) 16N 89N" | ./lambda_calculus) == $(echo "105N" | ./lambda_calculus)
+    - test $(echo "(lnmfx.nf(mfx)) 0N 5N" | ./lambda_calculus) == $(echo "5N" | ./lambda_calculus)
+    - test $(echo "(lnmfx.nf(mfx)) 5N 0N" | ./lambda_calculus) == $(echo "5N" | ./lambda_calculus)
+    - test $(echo "(lnmfx.nf(mfx)) 0N 0N" | ./lambda_calculus) == $(echo "0N" | ./lambda_calculus)
