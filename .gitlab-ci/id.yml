@@ -20,7 +20,7 @@ test-id_id:
 
 test-id_some:
   stage: test_complex
-  needs: [test-id_syntax, test_base]
+  needs: [test-id_syntax, test-id_id]
   script:
     - test $(echo "<> 12" | ./lambda_calculus) == $(echo "12" | ./lambda_calculus)
     - test $(echo "<> 5" | ./lambda_calculus) == $(echo "5" | ./lambda_calculus)
