@@ -34,3 +34,29 @@ test-nat_add:
     - test $(echo "(lnmfx.nf(mfx)) 0N 5N" | ./lambda_calculus) == $(echo "5N" | ./lambda_calculus)
     - test $(echo "(lnmfx.nf(mfx)) 5N 0N" | ./lambda_calculus) == $(echo "5N" | ./lambda_calculus)
     - test $(echo "(lnmfx.nf(mfx)) 0N 0N" | ./lambda_calculus) == $(echo "0N" | ./lambda_calculus)
+
+test-nat_mul:
+  stage: test_complex
+  needs: [test-nat_succ]
+  script:
+    - test $(echo "(lnmf.n(mf)) 3N 5N" | ./lambda_calculus) == $(echo "15N" | ./lambda_calculus)
+    - test $(echo "(lnmf.n(mf)) 6N 7N" | ./lambda_calculus) == $(echo "42N" | ./lambda_calculus)
+    - test $(echo "(lnmf.n(mf)) 9N 5N" | ./lambda_calculus) == $(echo "45N" | ./lambda_calculus)
+    - test $(echo "(lnmf.n(mf)) 28N 30N" | ./lambda_calculus) == $(echo "840N" | ./lambda_calculus)
+    - test $(echo "(lnmf.n(mf)) 1N 5N" | ./lambda_calculus) == $(echo "5N" | ./lambda_calculus)
+    - test $(echo "(lnmf.n(mf)) 0N 5N" | ./lambda_calculus) == $(echo "0N" | ./lambda_calculus)
+    - test $(echo "(lnmf.n(mf)) 5N 1N" | ./lambda_calculus) == $(echo "5N" | ./lambda_calculus)
+    - test $(echo "(lnmf.n(mf)) 5N 0N" | ./lambda_calculus) == $(echo "0N" | ./lambda_calculus)
+    - test $(echo "(lnmf.n(mf)) 0N 0N" | ./lambda_calculus) == $(echo "0N" | ./lambda_calculus)
+
+test-nat_pow:
+  stage: test_complex
+  needs: test-nat_succ
+  script:
+    - test $(echo "(lmnfx.mnfx) 0N 5N" | ./lambda_calculus) == $(echo "1N" | ./lambda_calculus)
+    - test $(echo "(lmnfx.mnfx) 5N 0N" | ./lambda_calculus) == $(echo "0N" | ./lambda_calculus)
+    - test $(echo "(lmnfx.mnfx) 0N 0N" | ./lambda_calculus) == $(echo "1N" | ./lambda_calculus)
+    - test $(echo "(lmnfx.mnfx) 5N 1N" | ./lambda_calculus) == $(echo "1N" | ./lambda_calculus)
+    - test $(echo "(lmnfx.mnfx) 1N 5N" | ./lambda_calculus) == $(echo "5N" | ./lambda_calculus)
+    - test $(echo "(lmnfx.mnfx) 2N 5N" | ./lambda_calculus) == $(echo "25N" | ./lambda_calculus)
+    - test $(echo "(lmnfx.mnfx) 5N 2N" | ./lambda_calculus) == $(echo "32N" | ./lambda_calculus)
