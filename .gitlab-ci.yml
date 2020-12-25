@@ -1,0 +1,47 @@
+default:
+    image: swipl:stable
+
+stages:
+  - build
+  - test_syntax
+  - test_base
+  - test_complex
+  - test_function
+
+before_script:
+  - swipl --version
+  - ls -l
+
+build-job:
+  stage: build
+  before_script:
+    - apt-get update
+    - apt-get install make
+  script:
+    - make
+  artifacts:
+    paths:
+      - lambda_calculus
+
+test-app:
+  stage: test_base
+  script:
+    - test $(echo "(lx.x) a" | ./lambda_calculus) == $(echo "a" | ./lambda_calculus)
+    - test $(echo "(lx.xx) a" | ./lambda_calculus) == $(echo "aa" | ./lambda_calculus)
+    - test $(echo "lx.(lx.x)x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "la.(lx.xx)a" | ./lambda_calculus) == $(echo "lx.xx" | ./lambda_calculus)
+    - test $(echo "lx.(lx.xx)x" | ./lambda_calculus) == $(echo "lx.xx" | ./lambda_calculus)
+    - test $(echo "lx.(lx.(lx.xx)xx)x" | ./lambda_calculus) == $(echo "lx.xxx" | ./lambda_calculus)
+
+include:
+  - local: .gitlab-ci/nat.yml
+  - local: .gitlab-ci/id.yml
+
+test-zal:
+  stage: test_syntax
+  script:
+    - test $(echo "-2Z" | ./lambda_calculus) == $(echo "(-2Z)" | ./lambda_calculus)
+    - test $(echo "-1Z" | ./lambda_calculus) == $(echo "(-1Z)" | ./lambda_calculus)
+    - test $(echo "0Z" | ./lambda_calculus) == $(echo "(0Z)" | ./lambda_calculus)
+    - test $(echo "1Z" | ./lambda_calculus) == $(echo "(1Z)" | ./lambda_calculus)
+    - test $(echo "2Z" | ./lambda_calculus) == $(echo "(2Z)" | ./lambda_calculus)
