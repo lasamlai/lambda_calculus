@@ -51,7 +51,7 @@ test-nat_mul:
 
 test-nat_pow:
   stage: test_complex
-  needs: test-nat_succ
+  needs: [test-nat_succ]
   script:
     - test $(echo "(lmnfx.mnfx) 0N 5N" | ./lambda_calculus) == $(echo "1N" | ./lambda_calculus)
     - test $(echo "(lmnfx.mnfx) 5N 0N" | ./lambda_calculus) == $(echo "0N" | ./lambda_calculus)
