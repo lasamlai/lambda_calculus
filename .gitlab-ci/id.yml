@@ -1,0 +1,19 @@
+test-id_syntax:
+  stage: test_syntax
+  script:
+    - test $(echo "lx.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "la.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "\\x.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "\\a.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "λx.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "λa.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+
+test-id:
+  stage: test_base
+  needs: [test-id_syntax]
+  script:
+    - test $(echo "<>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "<><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "<><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "<><><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
+    - test $(echo "<><><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)

@@ -35,6 +35,7 @@ test-app:
 
 include:
   - local: .gitlab-ci/nat.yml
+  - local: .gitlab-ci/id.yml
 
 test-zal:
   stage: test_syntax
@@ -44,23 +45,3 @@ test-zal:
     - test $(echo "0Z" | ./lambda_calculus) == $(echo "(0Z)" | ./lambda_calculus)
     - test $(echo "1Z" | ./lambda_calculus) == $(echo "(1Z)" | ./lambda_calculus)
     - test $(echo "2Z" | ./lambda_calculus) == $(echo "(2Z)" | ./lambda_calculus)
-
-test-id:
-  stage: test_syntax
-  script:
-    - test $(echo "lx.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - test $(echo "la.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - test $(echo "\\x.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - test $(echo "\\a.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - test $(echo "λx.x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - test $(echo "λa.a" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-
-test-id2:
-  stage: test_base
-  needs: [test-id]
-  script:
-    - test $(echo "<>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - test $(echo "<><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - test $(echo "<><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - test $(echo "<><><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - test $(echo "<><><><>" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
