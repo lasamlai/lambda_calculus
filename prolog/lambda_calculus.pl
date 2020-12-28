@@ -45,18 +45,11 @@ proc:-
     nl,
     proc.
 
-fix_reduction(A, C):-
-    reduction(f([],A),f([],B)),
-    !,
-    debug(lambda_calculus,"~@\n",write_lambda(B)),
-    fix_reduction(B, C).
-
-fix_reduction(A, A).
-
 proc_string(S):-
     string_lambda(S,L),
-    proc_reduction_(L,R),
+    fix_reduction(L,R),
     write_lambda(R),nl.
+
 
 proc_string_clear(S):-
     string_lambda(S,L),

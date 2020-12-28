@@ -102,7 +102,7 @@ add_lists(A,Z,[H|W],[H|M]):-
 
 lambda_add_close_Y(Atom,String):-
     string_lambda(String,L),
-    proc_reduction_(L,LL),
+    fix_reduction(L,LL),
     lambda_const('Y',Y),!,
     reduction(f([],a(LL,Y)),f([],Lambda)),!,
     lambda_const_add_(Atom,Lambda).
@@ -111,7 +111,7 @@ lambda_add_close_Y(Atom,String):-
 
 lambda_add_fix_close(YAtom,Atom,String):-
     string_lambda(String,L),
-    proc_reduction_(L,LL),
+    fix_reduction(L,LL),
     lambda_const_add_(Atom,LL),
     lambda_const('Y',Y),!,
     lambda_const_add_(YAtom,a(Y,LL)).
@@ -120,7 +120,7 @@ lambda_add_fix_close(YAtom,Atom,String):-
 
 lambda_add_close(Atom,String):-
     string_lambda(String,L),
-    proc_reduction_(L,LL),
+    fix_reduction(L,LL),
     lambda_const_add_(Atom,LL).
 
 :- volatile lambda_const_add/2.
