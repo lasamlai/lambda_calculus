@@ -17,7 +17,7 @@ exp(P,W) --> whites,(exp_(A),exp(a(P,A),W);{W=P}).
 exp_(E) --> l_exp(E).
 exp_(E) --> l_var(E).
 exp_(E) --> macro(E).
-exp_(E) --> "(",exp(E),")".
+exp_(E) --> "(",lam(E),")".
 
 l_exp(L) --> l, l_exp_(L).
 
@@ -27,6 +27,7 @@ l --> "\\".
 
 l_exp_(l(V,E)) --> l_lvar(V), l_exp_(E).
 l_exp_(E) --> ".", exp(E).
+
 
 macro(N) --> num_exp(N).
 macro('Y') --> "Y".
@@ -38,8 +39,6 @@ macro(pair(A,B)) --> "<",lam(A),",",lam(B),">".
 macro(krot([A|B])) --> "<",lam(A),lam_i_krot(B).
 macro(list([])) --> "[]".
 macro(list([A|B])) --> "[",lam(A),lam_i_list(B).
-macro(A) --> "(",!,lam(A),")".
-macro(A) --> l_var(A).
 
 num_exp(nat(N)) --> integer(N),"N".
 num_exp(int(N,M)) --> integer(N),"Z",integer(M).

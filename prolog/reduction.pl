@@ -4,6 +4,7 @@
           ]).
 
 :- use_module(semantic, [lambda_eq/4]).
+:- use_module(pritty_print).
 
 fix_reduction(A, C):-
     reduction(f([],A),f([],B)),
