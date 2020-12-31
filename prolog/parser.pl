@@ -7,56 +7,45 @@
 :- use_module(semantic,[lam_i_macros//1]).
 
 % Parsing
-%
-% ```
-% lam :=
-%      | L lam_
-%      | lam_t
-% ```
-lam(L) --> ("l";"λ";"\\"),!,lam_(L).
-lam(A) --> lam_t(A).
 
-%```
-%lam_t :=
-%       | lam_i
-%       | lam_i lam_t2
-%```
+lam(L) --> whites,exp(L).
 
-lam_t(T) --> lam_i(A),whites,(lam_t(A,T);{T=A}).
+exp(W) --> exp_(A),exp(A,W).
 
-%```
-%lam_t2 :=
-%        | lam_i
-%        | lam_i lam_t2
-%```
+exp(P,W) --> whites,(exp_(A),exp(a(P,A),W);{W=P}).
 
-lam_t(A,T) --> lam_i(B),whites,(lam_t(a(A,B),T);{T=a(A,B)}).
+exp_(E) --> l_exp(E).
+exp_(E) --> l_var(E).
+exp_(E) --> macro(E).
+exp_(E) --> "(",lam(E),")".
 
-%```
-%lam_i :=
-%       | number
-%       | "Y"
-%       | "(" lam ")"
-%       | l_var
-%```
+l_exp(L) --> l, l_exp_(L).
 
-lam_i(nat(N)) --> integer(N),"N".
-lam_i(int(N,M)) --> integer(N),"Z",integer(M).
-lam_i(enum(N,M)) --> integer(N),"E",integer(M).
-lam_i(bite(N,M)) --> integer(N),"B",integer(M).
-lam_i(int(N,0)) --> integer(N),"Z".
-lam_i(nat(N)) --> integer(N).
-lam_i('Y') --> "Y".
-lam_i('write') --> "write".
-lam_i('put_char') --> "put_char".
-lam_i(A) --> lam_i_macros(A).
-lam_i(A) --> up_chars(A).
-lam_i(pair(A,B)) --> "<",lam(A),",",lam(B),">".
-lam_i(krot([A|B])) --> "<",lam(A),lam_i_krot(B).
-lam_i(list([])) --> "[]".
-lam_i(list([A|B])) --> "[",lam(A),lam_i_list(B).
-lam_i(A) --> "(",!,lam(A),")".
-lam_i(A) --> l_var(A).
+l --> "l", !.
+l --> "λ", !.
+l --> "\\".
+
+l_exp_(l(V,E)) --> l_lvar(V), l_exp_(E).
+l_exp_(E) --> ".", exp(E).
+
+
+macro(N) --> num_exp(N).
+macro('Y') --> "Y".
+macro('write') --> "write".
+macro('put_char') --> "put_char".
+macro(A) --> lam_i_macros(A).
+macro(A) --> up_chars(A).
+macro(pair(A,B)) --> "<",lam(A),",",lam(B),">".
+macro(krot([A|B])) --> "<",lam(A),lam_i_krot(B).
+macro(list([])) --> "[]".
+macro(list([A|B])) --> "[",lam(A),lam_i_list(B).
+
+num_exp(nat(N)) --> integer(N),"N".
+num_exp(int(N,M)) --> integer(N),"Z",integer(M).
+num_exp(enum(N,M)) --> integer(N),"E",integer(M).
+num_exp(bite(N,M)) --> integer(N),"B",integer(M).
+num_exp(int(N,0)) --> integer(N),"Z".
+num_exp(nat(N)) --> integer(N).
 
 up_chars(A) -->
     up_chars_(AA),
@@ -76,20 +65,7 @@ lam_i_list([]) --> "]",!.
 lam_i_list(A) --> "|",!,lam(A),"]".
 lam_i_list([A|B]) --> ",",!,lam(A),lam_i_list(B).
 
-%```
-%l_var := Char
-%```
+l_lvar([]) --> "_",!.
+l_lvar(A) --> l_var(A).
 
 l_var(A) --> [C],{between(97,122,C),!,atom_codes(A,[C])}.
-
-%```
-%lam_ :=
-%      | "." lam
-%      | "_" lam_
-%      | lam_var lam_
-%```
-
-lam_(B) -->     ".",lam(B).
-lam_(l([],B))-->"_",lam_(B).
-lam_(l(A,B))--> l_var(A),lam_(B).
-

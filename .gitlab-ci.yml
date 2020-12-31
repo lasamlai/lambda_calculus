@@ -26,12 +26,12 @@ build-job:
 test-app:
   stage: test_base
   script:
-    - test $(echo "(lx.x) a" | ./lambda_calculus) == $(echo "a" | ./lambda_calculus)
-    - test $(echo "(lx.xx) a" | ./lambda_calculus) == $(echo "aa" | ./lambda_calculus)
-    - test $(echo "lx.(lx.x)x" | ./lambda_calculus) == $(echo "<>" | ./lambda_calculus)
-    - test $(echo "la.(lx.xx)a" | ./lambda_calculus) == $(echo "lx.xx" | ./lambda_calculus)
-    - test $(echo "lx.(lx.xx)x" | ./lambda_calculus) == $(echo "lx.xx" | ./lambda_calculus)
-    - test $(echo "lx.(lx.(lx.xx)xx)x" | ./lambda_calculus) == $(echo "lx.xxx" | ./lambda_calculus)
+    - test "$(echo "(lx.x) a" | ./lambda_calculus)" == "$(echo "a" | ./lambda_calculus)"
+    - test "$(echo "(lx.xx) a" | ./lambda_calculus)" == "$(echo "aa" | ./lambda_calculus)"
+    - test "$(echo "lx.(lx.x)x" | ./lambda_calculus)" == "$(echo "<>" | ./lambda_calculus)"
+    - test "$(echo "la.(lx.xx)a" | ./lambda_calculus)" == "$(echo "lx.xx" | ./lambda_calculus)"
+    - test "$(echo "lx.(lx.xx)x" | ./lambda_calculus)" == "$(echo "lx.xx" | ./lambda_calculus)"
+    - test "$(echo "lx.(lx.(lx.xx)xx)x" | ./lambda_calculus)" == "$(echo "lx.xxx" | ./lambda_calculus)"
 
 include:
   - local: .gitlab-ci/nat.yml
@@ -40,8 +40,8 @@ include:
 test-zal:
   stage: test_syntax
   script:
-    - test $(echo "-2Z" | ./lambda_calculus) == $(echo "(-2Z)" | ./lambda_calculus)
-    - test $(echo "-1Z" | ./lambda_calculus) == $(echo "(-1Z)" | ./lambda_calculus)
-    - test $(echo "0Z" | ./lambda_calculus) == $(echo "(0Z)" | ./lambda_calculus)
-    - test $(echo "1Z" | ./lambda_calculus) == $(echo "(1Z)" | ./lambda_calculus)
-    - test $(echo "2Z" | ./lambda_calculus) == $(echo "(2Z)" | ./lambda_calculus)
+    - test "$(echo "-2Z" | ./lambda_calculus)" == "$(echo "(-2Z)" | ./lambda_calculus)"
+    - test "$(echo "-1Z" | ./lambda_calculus)" == "$(echo "(-1Z)" | ./lambda_calculus)"
+    - test "$(echo "0Z" | ./lambda_calculus)" == "$(echo "(0Z)" | ./lambda_calculus)"
+    - test "$(echo "1Z" | ./lambda_calculus)" == "$(echo "(1Z)" | ./lambda_calculus)"
+    - test "$(echo "2Z" | ./lambda_calculus)" == "$(echo "(2Z)" | ./lambda_calculus)"

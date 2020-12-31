@@ -16,7 +16,8 @@ write_lambda_(L,Z,R):-
     write_lambda_unlam(K,Z,R).
 
 write_lambda_(A,_,_):-
-    var(A),!,
+    var(A),
+    !,
     format("\e[92m~w",[A]).
 
 write_lambda_(l(L1-L2,B),Z,R):-
@@ -31,50 +32,34 @@ write_lambda_(l(L-[],B),Z,R):-
     nazwa_zmien(Z,ZZ),
     write_lambda_l(B,ZZ,R).
 
+write_lambda_(a(A,a(B,C)),Z,R):-
+    !,
+    write_lambda_n(A,Z,R),
+    bracket(write_lambda_(a(B,C),Z,RR),R,RR).
+
 write_lambda_(a(A,C),Z,R):-
     !,
     write_lambda_n(A,Z,R),
-    write_lambda_k(C,Z,R).
+    format(" "),
+    write_lambda_(C,Z,R).
 
 write_lambda_(A,_,_):-
     format("\e[92m~w",[A]).
 
-% Nawiasuje lambde
+% Bracket if it is lambda
 
 write_lambda_n(l(K,W),Z,R):-
     !,
-    format("\e[38;5;~dm(",[R]),
-    next_color(R,RR),
-    write_lambda_(l(K,W),Z,RR),
-    format("\e[38;5;~dm)",[R]).
-write_lambda_n(A,Z,R):-
-    write_lambda_(A,Z,R).
+    bracket(write_lambda_(l(K,W),Z,RR), R, RR).
 
-% Nawiasuje Aplikacje i lambda
-write_lambda_k(l(K,W),Z,R):-
-    !,
-    format("\e[38;5;~dm(",[R]),
-    next_color(R,RR),
-    write_lambda_(l(K,W),Z,RR),
-    format("\e[38;5;~dm)",[R]).
-write_lambda_k(a(K,W),Z,R):-
-    !,
-    format("\e[38;5;~dm(",[R]),
-    next_color(R,RR),
-    write_lambda_(a(K,W),Z,RR),
-    format("\e[38;5;~dm)",[R]).
-write_lambda_k(A,Z,R):-
+write_lambda_n(A,Z,R):-
     write_lambda_(A,Z,R).
 
 write_lambda_l(L,Z,R):-
     witch_lambda_const_(L,K),!,
     format("\e[91m."),
     write_lambda_unlam(K,Z,R).
-/*
-write_lambda_l(L):-
-    lambda_n(L,N),!,
-    format("\e[91m.\e[39m(\e[36m~w\e[39m)",N).
-*/
+
 write_lambda_l(l(L1-L2,B),Z,R):-
     L1 == L2,
     !,
@@ -149,19 +134,19 @@ write_lambda_unlam(const(K),_,_):-
     format("\e[93m~w",[K]).
 write_lambda_unlam(nat(N),_,_):-
     !,
-    format("\e[39m(\e[36m~dN\e[39m)",[N]).
+    format("\e[36m~dN\e[39m",[N]).
 write_lambda_unlam(int(N,0),_,_):-
     !,
-    format("\e[39m(\e[36m~dZ\e[39m)",[N]).
+    format("\e[36m~dZ\e[39m",[N]).
 write_lambda_unlam(int(N,K),_,_):-
     !,
-    format("\e[39m(\e[36m~dZ~d\e[39m)",[N,K]).
+    format("\e[36m~dZ~d\e[39m",[N,K]).
 write_lambda_unlam(enum(N,K),_,_):-
     !,
-    format("\e[39m(\e[36m~dE~d\e[39m)",[N,K]).
+    format("\e[36m~dE~d\e[39m",[N,K]).
 write_lambda_unlam(bite(N,K),_,_):-
     !,
-    format("\e[39m(\e[36m~dB~d\e[39m)",[N,K]).
+    format("\e[36m~dB~d\e[39m",[N,K]).
 
 write_lambda_unlam(list([X|Y]),Z,R):-
     !,
@@ -196,6 +181,13 @@ lambda_krot_(F,FF,A,A):-
     F == FF,!.
 lambda_krot_(F,a(W,X),L,M):-
     lambda_krot_(F,W,[X|L],M).
+
+bracket(F, R, RR):-
+    !,
+    format("\e[38;5;~dm(",[R]),
+    next_color(R,RR),
+    F,
+    format("\e[38;5;~dm)",[R]).
 
 nazwa_zmien(z,'#1'):-!.
 nazwa_zmien(A,N):-
