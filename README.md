@@ -17,7 +17,7 @@ When you write a natural number in Church encoding, the pretty-printer will say 
 ```
 |:\fx.f(fx)
 
-(2N)
+2N
 ```
 
 Letter `N` means "Natural".
@@ -27,7 +27,7 @@ Letter `N` means "Natural".
 It is similar to logical values:
 
 ```
-|: lxy.x
+|: \xy.x
 
 TRUE
 ```
@@ -35,7 +35,7 @@ TRUE
 But if you write false you get:
 
 ```
-|: lxy.y
+|: \xy.y
 
 []
 ```
@@ -46,24 +46,24 @@ Because it is untyped lambda, so the printer doesn't know it is a `FALSE` or emp
 
 Pairs are programs which, depending on the boolean values, return the first or the second value:
 ```
-|: lx.x 10 12
+|: \x.x TRUE 12
 
-[(10N)|(12N)]
+[TRUE|12N]
 ```
 
 It could be written equivalently like this:
 ```
-|: <10|12>
+|: <TRUE|12>
 
-[(10N)|(12N)]
+[TRUE|12N]
 ```
 
 You can get the first element by applying the `TRUE`:
 
 ```
-|: <10|12> TRUE
+|: <TRUE|12> TRUE
 
-(10N)
+TRUE
 ```
 
 And the second element by applying `FALSE`:
@@ -71,7 +71,7 @@ And the second element by applying `FALSE`:
 ```
 |: <10|12> FALSE
 
-(12N)
+12N
 ```
 
 ### Lists
@@ -82,12 +82,9 @@ If we have pairs, we can use them to represent lists:
 |: FALSE
 
 []
-|: <7|FALSE>
-
-[(7N)]
 |: <12|<5|<7|FALSE>>>
 
-[(12N),(5N),(7N)]
+[12N,5N,7N]
 ```
 
 ### Tuples
@@ -95,23 +92,23 @@ If we have pairs, we can use them to represent lists:
 We represent a tuple in a similar way to pairs:
 
 ```
-|: lx.x 12 15 19
+|: \x.x 12 15 19
 
-<(12N)|(15N)|(19N)>
+<12N|15N|19N>
 ```
 
 To access the second element of abow tuple we apply `l_x_.x`:
 
 ```
-|: <12|15|19>(l_x_.x)
+|: <12|15|19> l_x_.x
 
-(15N)
+15N
 ```
 
 Following this analogy, the identity function is an empty tuple:
 
 ```
-|: lx.x
+|: \x.x
 
 <>
 ```
@@ -126,9 +123,9 @@ It means that it is getting second element (counting from zero) of a 5-element t
 So to get number `20` from tuple `<10|20|30|40|50>` you write:
 
 ```
-|: <10|20|30|40|50>(1E5)
+|: <10|20|30|40|50> 1E5
 
-(20N)
+20N
 ```
 
 ### Integers
@@ -138,43 +135,43 @@ Integers are constructed form pairs and natural numbers by [Grassman constructio
 ```
 |: <5|0>
 
-(5Z)
+5Z
 |: <0|5>
 
-(-5Z)
+-5Z
 |: <5|12>
 
-(-7Z5)
+-7Z5
 |: <12|5>
 
-(7Z5)
+7Z5
 ```
 
 ```
 |: <5|0>
 
-(5Z)
+5Z
 |: <0|5>
 
-(-5Z)
+-5Z
 |: <5|12>
 
-(-7Z5)
+-7Z5
 |: <12|5>
 
-(7Z5)
+7Z5
 ```
 
 Number `7Z5` means that it is integer `7` with an "excess" `5`.
 
 ### Binary numbers
 
-By using tuples and booleans you can write binary number $12_{(10)} = 1100_{2}$ like this:
+By using tuples and booleans you can write binary number $12_{(10)} = 1100_{(2)}$ like this:
 
 ```
 |: <TRUE|TRUE|FALSE|FALSE>
 
-(12B4)
+12B4
 ```
 
 Number `12B4` is binary number `12` in `4`-bit memory.
@@ -195,6 +192,41 @@ TRUE
 |: EQ TRUE FALSE
 
 []
+```
+
+## Syntax
+
+The full syntax is shown below:
+
+```yacc
+Lam := whites Exp
+
+Exp := Exp | Exp whites Exp_
+Exp_ := L_Exp | Macro | Var | '(' Lam ')'
+
+L_Exp := L L_Exp_
+L_Exp_ := LVar L_Exp_
+       |  '.' Exp
+L := 'l' | 'λ' | '\''
+
+Macro := [:upper:]+ | Tuple | List | Number_exp
+
+Tuple := '<' Tuple_1
+Tuple_1 := '>' | Lam Tuple_2
+Tuple_2 := '>' | '|' Tuple_2
+
+List := '[' List_1
+List_1 := ']' | Lam List_2
+List_2 := ']' | ',' List_2 | '|' Lam ']'
+
+Number_exp := [:digit:]+
+           | [:digit:]+ 'N'
+           | [:digit:]+ 'Z' [:digit:]*
+           | [:digit:]+ 'B' [:digit:]+
+
+LVar := '_'
+     |  Var
+Var := [:lower:] # 'l'
 ```
 
 ## Required
