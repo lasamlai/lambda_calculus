@@ -40,7 +40,7 @@ But if you write false you get:
 []
 ```
 
-Because it is untyped lambda, so the printer doesn't know it is a `FALSE` or empty list (see below).
+Because it is untyped lambda calculus, so the printer doesn't know it is a `FALSE` or empty list (see below).
 
 ### Pairs
 
@@ -97,7 +97,7 @@ We represent a tuple in a similar way to pairs:
 <12N|15N|19N>
 ```
 
-To access the second element of abow tuple we apply `l_x_.x`:
+To access the second element of above tuple we apply `l_x_.x`:
 
 ```
 |: <12|15|19> l_x_.x
@@ -130,7 +130,7 @@ So to get number `20` from tuple `<10|20|30|40|50>` you write:
 
 ### Integers
 
-Integers are constructed form pairs and natural numbers by [Grassman construction](https://en.wikipedia.org/wiki/Integer#Construction):
+Integers are constructed from pairs and natural numbers by [Grassman construction](https://en.wikipedia.org/wiki/Integer#Construction):
 
 ```
 |: <5|0>
@@ -178,7 +178,7 @@ Number `12B4` is binary number `12` in `4`-bit memory.
 
 ### Equals
 
-The built-in operator `EQ` checks alpha equality between two lambda expressions:
+The built-in operator `EQ` checks alpha equivalence between two lambda expressions:
 ```
 |: EQ <> <>
 
