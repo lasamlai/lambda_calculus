@@ -3,13 +3,9 @@
               lambda_enum/4,
               lambda_n/2,
               lambda_const/2,
-              lam_i_macros//1,
               lambda_eq/4,
               num_bite/2
           ]).
-
-:- abolish(parser:lam_i_macros/3).
-:- dynamic lam_i_macros//1.
 
 :- use_module(parser).
 :- use_module(reduction).
@@ -308,20 +304,20 @@ var_eq([_|V1],A,[_|V2],B):-
 :- lambda_const_add('<>',"lx.x").
 :- lambda_const_add('Y',"lf.(lx.f(xx))(lx.f(xx))").
 
-:- lambda_const_add('Ninf',"lfx.Yf").
+:- lambda_const_add('NINF',"lfx.Yf").
 
 :- lambda_const_add('[]',"l_a.a").
 :- lambda_const_add('FALSE',"l_x.x").
 :- lambda_const_add('TRUE',"lx_.x").
 
-:- lambda_const_add('Nsucc',"lnfx.f(nfx)").
-:- lambda_const_add('NSUCC',"lnfx.nf(fx)").
-:- lambda_const_add('Nplus',"lmnfx.mf(nfx)").
-:- lambda_const_add('Npred',"lnfx.n(lgh.h(gf))(lu.x)(lu.u)").
-:- lambda_const_add('Nminus',"lmn.nNpredm").
-:- lambda_const_add('Nmul',"lmnf.m(nf)").
-:- lambda_const_add('Nexp',"lmn.nm").
-:- lambda_const_add('NIsZero',"ln.n(lx.FALSE)TRUE").
+:- lambda_const_add('NSUCC',"lnfx.f(nfx)").
+:- lambda_const_add('NSUCCC',"lnfx.nf(fx)").
+:- lambda_const_add('NPLUS',"lmnfx.mf(nfx)").
+:- lambda_const_add('NPRED',"lnfx.n(lgh.h(gf))(lu.x)(lu.u)").
+:- lambda_const_add('NMINUS',"lmn.nNPREDm").
+:- lambda_const_add('NMUL',"lmnf.m(nf)").
+:- lambda_const_add('NEXP',"lmn.nm").
+:- lambda_const_add('NISZERO',"ln.n(lx.FALSE)TRUE").
 
 :- lambda_const_add('PAIR',"labf.fab").
 :- lambda_const_add('CAR',"<TRUE>").
@@ -330,43 +326,46 @@ var_eq([_|V1],A,[_|V2],B):-
 :- lambda_const_add('AND',"lpq.pqp").
 :- lambda_const_add('OR',"lpq.ppq").
 :- lambda_const_add('NOT',"lpab.pba").
-:- lambda_const_add('Not',"lp.p[]TRUE").
+:- lambda_const_add('NOTT',"lp.p[]TRUE").
 
 :- lambda_add_close('XOR',"lpq.p(NOTq)q").
-:- lambda_add_close('Xor',"lpq.p(Notq)q").
+:- lambda_add_close('XORR',"lpq.p(NOTTq)q").
+
+:- lambda_add_close("LEFT", "lxfr.fx").
+:- lambda_add_close("RIGHT", "lxfr.rx").
 
 :- lambda_add_close('NXOR',"lpq.NOT(XORpq)").
-:- lambda_add_close('NXor',"lpq.Not(Xorpq)").
+:- lambda_add_close('NXORR',"lpq.NOTT(XORRpq)").
 
-:- lambda_const_add('IsNil',"lw.w(lhtd.FALSE)TRUE").
+:- lambda_const_add('ISNIL',"lw.w(lhtd.FALSE)TRUE").
 
-:- lambda_add_close('Nleq',"lmn.NIsZero(Nminusmn)").
-:- lambda_add_close('Neq',"lmn.AND(Nleqmn)(Nleqnm)").
+:- lambda_add_close('NLEQ',"lmn.NISZERO(NMINUSmn)").
+:- lambda_add_close('NEQ',"lmn.AND(NLEQmn)(NLEQnm)").
 
-:- lambda_const_add('NtoZ',"ln.<n|0>").
-:- lambda_add_close('Zneg',"λz.<CDRz|CARz>").
-:- lambda_add_fix_close('OneZero','POneZero',"lfz.NIsZero(CDRz)z(NIsZero(CDRz)z(f<Npred(CARz)|Npred(CDRz)>))").
+:- lambda_const_add('NTOZ',"ln.<n|0>").
+:- lambda_add_close('ZNEG',"λz.<CDRz|CARz>").
+:- lambda_add_fix_close('ONEZERO','PONEZERO',"lfz.NISZERO(CDRz)z(NISZERO(CDRz)z(f<NPRED(CARz)|NPRED(CDRz)>))").
 
-:- lambda_add_close('Zplus',"lxy.<Nplus(CARx)(CARy)|Nplus(CDRx)(CDRy)>").
-:- lambda_add_close('Zminus',"lxy.<Nplus(CARx)(CDRy)|Nplus(CDRx)(CARy)>").
+:- lambda_add_close('ZPLUS',"lxy.<NPLUS(CARx)(CARy)|NPLUS(CDRx)(CDRy)>").
+:- lambda_add_close('ZMINUS',"lxy.<NPLUS(CARx)(CDRy)|NPLUS(CDRx)(CARy)>").
 
-:- lambda_const_add('IsZero',"NIsZero").
-:- lambda_const_add('Value',"lmn.nm").
+:- lambda_const_add('ISZERO',"NISZERO").
+:- lambda_const_add('VALUE',"lmn.nm").
 
-:- lambda_const_add('Svar',"ln.<0N|n>").
-:- lambda_const_add('Sapp',"lab.<1N|<a|b>>").
-:- lambda_const_add('Slam',"lvw.<2N|<v|w>>").
+:- lambda_const_add('SVAR',"ln.<0N|n>").
+:- lambda_const_add('SAPP',"lab.<1N|<a|b>>").
+:- lambda_const_add('SLAM',"lvw.<2N|<v|w>>").
 %:- lambda_const_add('MAP',"Y(lfdi.(Neqi(dTRUETRUE))(dTRUE[])(f(d[])i))").
-:- lambda_add_fix_close('NMap','PNMap',"lfdi.(IsNild)<[]|i>((Neqi(dTRUETRUE))<TRUE|dTRUE[]>(f(d[])i))").
-:- lambda_add_close_Y('EMap',"ly.(le.y(lfdi.(IsNild)<[]|i>((ei(dTRUETRUE))<TRUE|dTRUE[]>(f(d[])i))))").
-:- lambda_add_fix_close('NMember','PNMember',"lfdi.(IsNild)[]((Neqi(dTRUE))TRUE(f(d[])i))").
-:- lambda_add_close_Y('EMember',"ly.(le.y(lfdi.(IsNild)[]((ei(dTRUE))TRUE(f(d[])i))))").
+:- lambda_add_fix_close('NMAP','PNMAP',"lfdi.(ISNILd)<[]|i>((NEQi(dTRUE TRUE))<TRUE|dTRUE[]>(f(d[])i))").
+:- lambda_add_close_Y('EMAP',"ly.(le.y(lfdi.(ISNILd)<[]|i>((ei(dTRUE TRUE))<TRUE|dTRUE[]>(f(d[])i))))").
+:- lambda_add_fix_close('NMEMBER','PNMember',"lfdi.(ISNILd)[]((NEQi(dTRUE))TRUE(f(d[])i))").
+:- lambda_add_close_Y('EMEMBER',"ly.(le.y(lfdi.(ISNILd)[]((ei(dTRUE))TRUE(f(d[])i))))").
 %:- lambda_const_add('INT',"Y(lfdi.(Neq0(iTRUE))(MAPd(i[]))((Neq1(iTRUE))((fd(i[]TRUE))(fd(i[][])))(lx.f[<i[]TRUE|x>|d](i[]TRUE))))").
-:- lambda_add_close_Y('RINT',"ly.y(lfdi.((yPNMap)[<0|((yPNMap)d(i[]))[]>,<1|(fd(i[]TRUE))(fd(i[][]))>,<2|lx.f[<i[]TRUE|x>|d](i[][])>](iTRUE))[])").
+:- lambda_add_close_Y('RINT',"ly.y(lfdi.((yPNMAP)[<0|((yPNMAP)d(i[]))[]>,<1|(fd(i[]TRUE))(fd(i[][]))>,<2|lx.f[<i[]TRUE|x>|d](i[][])>](iTRUE))[])").
 
 :- lambda_const_add('INT','RINT[]').
 
-:- compile_predicates([lambda_const/2,parser:lam_i_macros//1]).
+%:- compile_predicates([lambda_const/2]).
 
 
 /**@test (Y(lfx.(NIsZerox)12(f(Npredx))))1

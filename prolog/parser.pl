@@ -4,7 +4,6 @@
 
 
 :- use_module(library(dcg/basics)).
-:- use_module(semantic,[lam_i_macros//1]).
 
 % Parsing
 
@@ -30,12 +29,12 @@ l_exp_(E) --> ".", exp(E).
 
 
 macro(N) --> num_exp(N).
-macro('Y') --> "Y".
 macro('write') --> "write".
 macro('put_char') --> "put_char".
-macro(A) --> lam_i_macros(A).
+%macro(A) --> lam_i_macros(A).
 macro(A) --> up_chars(A).
 macro(pair(A,B)) --> "<",lam(A),",",lam(B),">".
+macro(krot([])) --> "<>".
 macro(krot([A|B])) --> "<",lam(A),lam_i_krot(B).
 macro(list([])) --> "[]".
 macro(list([A|B])) --> "[",lam(A),lam_i_list(B).
