@@ -331,8 +331,8 @@ var_eq([_|V1],A,[_|V2],B):-
 :- lambda_add_close('XOR',"lpq.p(NOTq)q").
 :- lambda_add_close('XORR',"lpq.p(NOTTq)q").
 
-:- lambda_add_close("LEFT", "lxfr.fx").
-:- lambda_add_close("RIGHT", "lxfr.rx").
+:- lambda_add_close('LEFT', "lxfr.fx").
+:- lambda_add_close('RIGHT', "lxfr.rx").
 
 :- lambda_add_close('NXOR',"lpq.NOT(XORpq)").
 :- lambda_add_close('NXORR',"lpq.NOTT(XORRpq)").
@@ -355,7 +355,11 @@ var_eq([_|V1],A,[_|V2],B):-
 :- lambda_const_add('SVAR',"ln.<0N|n>").
 :- lambda_const_add('SAPP',"lab.<1N|<a|b>>").
 :- lambda_const_add('SLAM',"lvw.<2N|<v|w>>").
-%:- lambda_const_add('MAP',"Y(lfdi.(Neqi(dTRUETRUE))(dTRUE[])(f(d[])i))").
+
+:- lambda_add_fix_close('MAP', 'PMAP', "lywf.w (lht_.<f h|y t f>) []").
+:- lambda_add_fix_close('FOLDL', 'PFOLDL', "λyfaw.w (λht_.y f (f a h) t) a").
+:- lambda_add_fix_close('FOLDR', 'PFOLDR', "λyfwa.w (λht_.f h (y f t a)) a").
+
 :- lambda_add_fix_close('NMAP','PNMAP',"lfdi.(ISNILd)<[]|i>((NEQi(dTRUE TRUE))<TRUE|dTRUE[]>(f(d[])i))").
 :- lambda_add_close_Y('EMAP',"ly.(le.y(lfdi.(ISNILd)<[]|i>((ei(dTRUE TRUE))<TRUE|dTRUE[]>(f(d[])i))))").
 :- lambda_add_fix_close('NMEMBER','PNMember',"lfdi.(ISNILd)[]((NEQi(dTRUE))TRUE(f(d[])i))").
