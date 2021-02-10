@@ -7,16 +7,20 @@
 
 % Parsing
 
-lam(L) --> whites,exp(L).
+lam(L) --> whites, exp(L).
 
-exp(W) --> exp_(A),exp(A,W).
+exp(E) --> app(A), !, (app_last(L), !, {E = a(A, L)}; {E = A}).
+exp(L) --> app_last(L).
 
-exp(P,W) --> whites,(exp_(A),exp(a(P,A),W);{W=P}).
+app(W) --> ato(A), app(A,W).
+app(P,W) --> whites, (ato(A), !, app(a(P,A),W); {W=P}).
 
-exp_(E) --> l_exp(E).
-exp_(E) --> l_var(E).
-exp_(E) --> macro(E).
-exp_(E) --> "(",lam(E),")".
+app_last(E) --> l_exp(E), !.
+app_last(E) --> ato(E).
+
+ato(E) --> "(", !, lam(E), ")".
+ato(E) --> l_var(E), !.
+ato(E) --> macro(E).
 
 l_exp(L) --> l, l_exp_(L).
 
@@ -24,9 +28,8 @@ l --> "l", !.
 l --> "λ", !.
 l --> "\\".
 
+l_exp_(E) --> ".", !, exp(E).
 l_exp_(l(V,E)) --> l_lvar(V), l_exp_(E).
-l_exp_(E) --> ".", exp(E).
-
 
 macro(N) --> num_exp(N).
 macro('write') --> "write".
@@ -67,4 +70,4 @@ lam_i_list([A|B]) --> ",",!,lam(A),lam_i_list(B).
 l_lvar([]) --> "_",!.
 l_lvar(A) --> l_var(A).
 
-l_var(A) --> [C],{between(97,122,C),!,atom_codes(A,[C])}.
+l_var(A) --> [C], {between(97,122,C), C \= 108, !, atom_codes(A, [C])}.

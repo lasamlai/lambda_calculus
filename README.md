@@ -201,8 +201,13 @@ The full syntax is shown below:
 ```yacc
 Lam := whites Exp
 
-Exp := Exp | Exp whites Exp_
-Exp_ := L_Exp | Macro | Var | '(' Lam ')'
+Exp := App_last | App whites [App_last]
+
+App := Ato | App whites Ato
+
+App_last  := Ato | L_Exp
+
+Ato := Macro | Var | '(' Lam ')'
 
 L_Exp := L L_Exp_
 L_Exp_ := LVar L_Exp_
