@@ -6,7 +6,7 @@ Evaluator of untyped lambda calculus.
 
 ## Characteristic
 
-When pretty printer recognizes that a given lambda structure is equivalent to some macro, it will be displayed.
+When a pretty printer recognizes that a given lambda structure is equivalent to some macro, it will be displayed.
 
 ## Examples
 
@@ -44,7 +44,7 @@ Because it is untyped lambda calculus, so the printer doesn't know it is a `FALS
 
 ### Pairs
 
-Pairs are programs which, depending on the boolean values, return the first or the second value:
+Pairs are programs that, depending on the boolean values, return the first or the second value:
 ```
 |: \x.x TRUE 12
 
@@ -97,7 +97,7 @@ We represent a tuple in a similar way to pairs:
 <12N|15N|19N>
 ```
 
-To access the second element of above tuple we apply `l_x_.x`:
+To access the second element of the above tuple we apply `l_x_.x`:
 
 ```
 |: <12|15|19> l_x_.x
@@ -118,7 +118,7 @@ Following this analogy, the identity function is an empty tuple:
 To get the second element of a 5-element tuple, write `\_x___.x`.
 
 We have simplified this entry for `1E5`.
-It means that it is getting second element (counting from zero) of a 5-element tuple.
+It means that it is getting the second element (counting from zero) of a 5-element tuple.
 
 So to get number `20` from tuple `<10|20|30|40|50>` you write:
 
