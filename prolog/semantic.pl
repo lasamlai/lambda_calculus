@@ -305,11 +305,26 @@ var_eq([_|V1],A,[_|V2],B):-
 :- lambda_const_add('Y',"lf.(lx.f(xx))(lx.f(xx))").
 :- lambda_const_add('O', "lfgx.f (g x)").
 
+:- lambda_const_add('K', "lx_.x").
+:- lambda_const_add('S', "lfgx.f x (g x)").
+
 :- lambda_const_add('NINF',"lfx.Yf").
 
 :- lambda_const_add('[]',"l_a.a").
 :- lambda_const_add('FALSE',"l_x.x").
 :- lambda_const_add('TRUE',"lx_.x").
+
+
+:- lambda_const_add('NIL', "λcn.n").
+:- lambda_const_add('CONS', "λht.λcn.c h (t c n)").
+:- lambda_const_add('NONE', "lns.n").
+:- lambda_const_add('SOME', "lens.s e").
+:- lambda_const_add('NN', "<<>|NIL>").
+:- lambda_const_add('FST', "lt.t K").
+:- lambda_const_add('SND', "lt.t []").
+:- lambda_const_add('SS', "lxp.<CONS x|(FST p) (SND p)>").
+:- lambda_const_add('TAIL', "λt.SND (t SS NN)").
+
 
 :- lambda_const_add('NSUCC',"lnfx.f(nfx)").
 :- lambda_const_add('NSUCCC',"lnfx.nf(fx)").
@@ -335,8 +350,8 @@ var_eq([_|V1],A,[_|V2],B):-
 :- lambda_add_close('LEFT', "lxfr.fx").
 :- lambda_add_close('RIGHT', "lxfr.rx").
 
-:- lambda_add_close('SOME', "left.fe").
-:- lambda_add_close('NONE', "l_x.x").
+%:- lambda_add_close('SOME', "left.fe").
+%:- lambda_add_close('NONE', "l_x.x").
 
 :- lambda_add_close('OMAP', "lof.o (λe.SOME (f e)) NONE").
 
