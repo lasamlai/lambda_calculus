@@ -108,8 +108,10 @@ witch_lambda_const_(L,int(Z,K)):-
     lambda_n(B,M),!,
     Z is N - M,
     K is min(N,M).
+*/
 witch_lambda_const_(L, enum(Z,K)):-
     lambda_enum(L,Z,K,p).
+/*
 witch_lambda_const_(L, bite(N,B)):-
     is_lambda_krot(L,K),
     length(K,B),

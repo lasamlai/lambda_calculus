@@ -1,6 +1,6 @@
 :- module(semantic, [
               string_lambda/2,
-              %lambda_enum/4,
+              lambda_enum/4,
               lambda_n/2,
               lambda_const/2,
               lambda_eq/2,
@@ -35,11 +35,9 @@ lam_var(int(N,M),L,_):-
     lambda_number(NL,N1),
     lambda_number(NP,N2),
     get_lambda_pair(L,NL,NP).
-/*
 lam_var(enum(Z,K),L,_):-
     !,
     lambda_enum(L,Z,K,g).
-*/
 lam_var(bite(Z,K),L,_):-
     !,
     num_bite_p(L,Z,K).
@@ -143,35 +141,34 @@ lambda_n2(F1,X,a(F2,A),N):-
     lambda_n2(F1,X,A,NN),
     succ(NN,N).
 
-/*
 lambda_enum(L,Z,K,C):-
-    lambda_enum_1(L,Z,K,C).
+    lambda_enum_1(L,[],Z,K,C).
 
-lambda_enum_1(V,_,_,p):-
-    var(V),!,fail.
-lambda_enum_1(l([A|H]-HH,R),0,KK,C):-
-    (   C = g
-    ->  H = HH
-    ;   H == HH),
+lambda_enum_1(V,L,_,_,p):-
+    var(V),
+    L = [],
     !,
-    lsucc(K,KK),
-    lambda_enum_2(A,R,K,C).
-lambda_enum_1(l(H-HH,R),ZZ,KK,C):-
-    (   C = g
-    ->  H = HH
-    ;   H == HH),
-    lsucc(K,KK),
-    lsucc(Z,ZZ),
-    lambda_enum_1(R,Z,K,C).
+    fail.
+lambda_enum_1(V,L,Z,K,p):-
+    var(V),
+    !,
+    length(L, K),
+    lnth0(N,L,V),
+    Z is K - N - 1.
+lambda_enum_1(V,L,Z,K,g):-
+    length(L, K),
+    !,
+    N is K - Z - 1,
+    nth0(N,L,V).
+lambda_enum_1(l(X,R),L,Z,K,C):-
+    lambda_enum_1(R,[X|L],Z,K,C).
 
-lambda_enum_2(A,AA,0,g):-
-    A = AA,!.
-lambda_enum_2(A,AA,0,p):-
-    A == AA,!.
-lambda_enum_2(A,l(H-H,R), KK,C):-
-    lsucc(K,KK),
-    lambda_enum_2(A,R,K,C).
-*/
+lnth0(0, [X|_], V):-
+    X == V.
+lnth0(NN, [_|L], V):-
+    lsucc(N, NN),
+    lnth0(N, L, V).
+
 lsucc(N,M):-
     when((nonvar(N);nonvar(M)),system:succ(N,M)).
 
