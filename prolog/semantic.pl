@@ -1,9 +1,9 @@
 :- module(semantic, [
               string_lambda/2,
-              lambda_enum/4,
+              %lambda_enum/4,
               lambda_n/2,
               lambda_const/2,
-              lambda_eq/4,
+              lambda_eq/2,
               num_bite/2
           ]).
 
@@ -16,15 +16,15 @@ string_lambda(S,LL):-
 
 codes_lambda(CC,LL):-
     phrase(lam(L),CC),!,
-    lam_var(L,LL,[],[]).
+    lam_var(L,LL,[]).
 
 % Tu Analizujemu sparsowane dane
 
 
-lam_var(nat(N),L,P,P):-
+lam_var(nat(N),L,_):-
     !,
     lambda_number(L,N).
-lam_var(int(N,M),L,P,P):-
+lam_var(int(N,M),L,_):-
     !,
     (   N >= 0
     ->  N1 is N + M,
@@ -35,62 +35,56 @@ lam_var(int(N,M),L,P,P):-
     lambda_number(NL,N1),
     lambda_number(NP,N2),
     get_lambda_pair(L,NL,NP).
-lam_var(enum(Z,K),L,P,P):-
+/*
+lam_var(enum(Z,K),L,_):-
     !,
     lambda_enum(L,Z,K,g).
-lam_var(bite(Z,K),L,P,P):-
+*/
+lam_var(bite(Z,K),L,_):-
     !,
     num_bite_p(L,Z,K).
-lam_var(pair(V,W),l([B|A]-A, a(a(B, X), Y)),R,P):-
+lam_var(pair(V,W),l(B, a(a(B, X), Y)),R):-
     !,
-    lam_var(V,X,R,E),
-    lam_var(W,Y,E,P).
-lam_var(krot(KK),l([F|H]-H, W),R,P):-
+    lam_var(V,X,R),
+    lam_var(W,Y,R).
+lam_var(krot(KK),l(F, W),R):-
     !,
     reverse(KK,K),
-    lam_var_krot(K,F,W,R,P).
-lam_var(list(LL),L,R,P):-
+    lam_var_krot(K,F,W,R).
+lam_var(list(LL),L,R):-
     !,
-    lam_var_list(LL,L,R,P).
-lam_var(A,L,P,P):-
+    lam_var_list(LL,L,R).
+lam_var(A,L,_):-
     atom(A),
     lambda_const(A,L),!.
 /*lam_var('Y',l([G, C|A]-A, a(l([E, D|B]-B, a(C, a(D, E))), l([I, H|F]-F, a(G, a(H, I))))),P,P):-
     !.*/
-lam_var(l(A,B),l(M,D),R,P):-
+lam_var(l(A,B),l(M,D),R):-
     !,
-    lam_var(B,D,[A=L-L|R],[A=M|P]).
-lam_var(a(A,B),a(C,D),R,P):-
+    lam_var(B,D,[A=M|R]).
+lam_var(a(A,B),a(C,D),R):-
     !,
-    lam_var(A,C,R,E),
-    lam_var(B,D,E,P).
-lam_var(A,W,R,P):-
-    member(A=_,R),
-    !,
-    add_lists(A,W,R,P).
-lam_var(A,A,P,P).
+    lam_var(A,C,R),
+    lam_var(B,D,R).
+lam_var(A,W,R):-
+    member(A=W,R),
+    !.
+lam_var(A,A,_).
 
-lam_var_krot([],F,F,P,P):-!.
-lam_var_krot([A|B],F,a(W,AA),R,P):-
-    lam_var(A,AA,R,E),
-    lam_var_krot(B,F,W,E,P).
+lam_var_krot([],F,F,_):-!.
+lam_var_krot([A|B],F,a(W,AA),R):-
+    lam_var(A,AA,R),
+    lam_var_krot(B,F,W,R).
 
-lam_var_list([],L,P,P):-
+lam_var_list([],L,_):-
     lambda_const('FALSE',L),!.
-lam_var_list([A|B],L,R,P):-
+lam_var_list([A|B],L,R):-
     !,
-    lam_var(A,AA,R,E),
+    lam_var(A,AA,R),
     get_lambda_pair(L,AA,K),
-    lam_var_list(B,K,E,P).
-lam_var_list(A,AA,R,P):-
-    lam_var(A,AA,R,P).
-
-add_lists(_,_,[],[]):-
-    throw("error adding to list").
-add_lists(A,Z,[A=L-O|W],[A=[Z|L]-O|W]):-!.
-add_lists(A,Z,[H|W],[H|M]):-
-    add_lists(A,Z,W,M).
-
+    lam_var_list(B,K,R).
+lam_var_list(A,AA,R):-
+    lam_var(A,AA,R).
 
 % Consts
 
@@ -123,66 +117,33 @@ lambda_add_close(Atom,String):-
 
 lambda_const_add(Atom,String):-
     string_lambda(String,L),
-    find_(L,M,[]),
-    list_to_and(M,F),
-    assertz(:-(lambda_const(Atom,L),F)),
-    atom_string(Atom,SS),
-    expand_term(lam_i_macros(Atom)-->SS,EE),
-    parser:assertz(EE).
+    lambda_const_add_(Atom, L).
 
 :- volatile lambda_const_add_/2.
 
 lambda_const_add_(Atom,Lambda):-
-    find_(Lambda,M,[]),
-    list_to_and(M,F),
-    assertz(:-(lambda_const(Atom,Lambda),F)),
+    assertz(lambda_const(Atom,Lambda)),
     atom_string(Atom,SS),
     expand_term(lam_i_macros(Atom)-->SS,EE),
     parser:assertz(EE).
 
-:- volatile find_/3.
-
-find_(A,F,F):-
-    var(A),!.
-find_(l(_-A,K),[end(A)|F],L):-
-    find_(K,F,L).
-find_(a(A,B),F,L):-
-    find_(A,F,E),
-    find_(B,E,L).
-
-:- volatile list_to_and/2.
-
-list_to_and([A],A):-!.
-list_to_and([A|B],(A,C)):-
-    list_to_and(B,C).
-
-end(L):-
-    var(L),!.
-end([]).
-
-member_eq(_,V):-
-    var(V),!,fail.
-member_eq(X,[H|_]):-
-    X == H,!.
-member_eq(X,[_|L]):-
-    member_eq(X,L).
-
-get_lambda_pair(l([B|A]-A, a(a(B,X),Y)),X,Y).
+get_lambda_pair(l(B, a(a(B,X),Y)),X,Y).
 
 
-lambda_n(l(F-_,H),N):-
+lambda_n(l(F,H),N):-
     lambda_n1(F,H,N).
-lambda_n1(F,l(X-_,A),N):-
+lambda_n1(F,l(X,A),N):-
     lambda_n2(F,X,A,N).
 lambda_n2(_,X,A,0):-
-    (var(A);atom(A)),
-    member_eq(A,X).
-lambda_n2(F,X,a(FF,A),N):-
+    X == A,
+    !.
+lambda_n2(F1,X,a(F2,A),N):-
+    F1 == F2,
     (number(N)->succ(NN,N);true),
-    member_eq(FF,F),
-    lambda_n2(F,X,A,NN),
+    lambda_n2(F1,X,A,NN),
     succ(NN,N).
 
+/*
 lambda_enum(L,Z,K,C):-
     lambda_enum_1(L,Z,K,C).
 
@@ -210,7 +171,7 @@ lambda_enum_2(A,AA,0,p):-
 lambda_enum_2(A,l(H-H,R), KK,C):-
     lsucc(K,KK),
     lambda_enum_2(A,R,K,C).
-
+*/
 lsucc(N,M):-
     when((nonvar(N);nonvar(M)),system:succ(N,M)).
 
@@ -218,22 +179,21 @@ lsucc(N,M):-
 
 lambda_number(_,N):-
     \+ var(N),
-    \+ number(N),!,
+    \+ number(N),
+    !,
     fail.
-lambda_number(l(F,l([X|L]-L,M)),N):-
-    end(L),
+lambda_number(l(F,l(X,M)),N):-
     !,
     lambda_number_(F,M,X,N).
-lambda_number_(L-LL,X,X,0):-
-    end(L),
+lambda_number_(_,X,X,0):-
+    !.
+lambda_number_(F,a(F,M),X,NN):-
+    number(NN),
     !,
-    L = LL.
-lambda_number_([F|K]-L,a(F,M),X,NN):-
-    number(NN),!,
     succ(N,NN),
-    lambda_number_(K-L,M,X,N).
-lambda_number_([F|K]-L,a(F,M),X,NN):-
-    lambda_number_(K-L,M,X,N),
+    lambda_number_(F,M,X,N).
+lambda_number_(F,a(F,M),X,NN):-
+    lambda_number_(F,M,X,N),
     succ(N,NN).
 
 num_bite(L,B):-
@@ -250,7 +210,7 @@ num_bite_([H|T], W, L) :-
 
 num_bite_p(F,B,Z):-
     num_bite_p_(B, [], L, Z),
-    lam_var(krot(L),F,[],[]).
+    lam_var(krot(L),F,[]).
 num_bite_p_(0, T, L, Z) :-
     !,
     num_bite_p_zeros(Z, T, L).
@@ -272,31 +232,25 @@ num_bite_p_zeros(Z, T, L) :-
 
 %!  lambda_eq(Vars1,L1,Vars2,L2) is det
 
-lambda_eq(_,A,_,B):-
+lambda_eq(A, B):-
     atom(A),atom(B),
     !,
     A = B.
-lambda_eq(V1,A,V2,B):-
+lambda_eq(A, B):-
     var(A),
     !,
     var(B),
-    var_eq(V1,A,V2,B).
-lambda_eq(_,_,_,B):-
+    A == B.
+lambda_eq(_,B):-
     var(B),
     !,
     fail.
-lambda_eq(V1,a(A,B),V2,a(C,D)):-
-    lambda_eq(V1,A,V2,C),
-    lambda_eq(V1,B,V2,D).
-lambda_eq(V1,l(F,A),V2,l(G,B)):-
-    lambda_eq([F|V1],A,[G|V2],B).
-
-var_eq([F-_|_],A,[G-_|_],B):-
-    member_eq(A,F),
-    !,
-    member_eq(B,G).
-var_eq([_|V1],A,[_|V2],B):-
-    var_eq(V1,A,V2,B).
+lambda_eq(a(A,B),a(C,D)):-
+    lambda_eq(A,C),
+    lambda_eq(B,D).
+lambda_eq(l(F,A),l(G,B)):-
+    F = G,
+    lambda_eq(A,B).
 
 :- abolish(lambda_const/2).
 :- dynamic lambda_const/2.
