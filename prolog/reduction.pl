@@ -1,14 +1,18 @@
 :- module(reduction,[
               reduction/2,
-              proc_reduction_/2
+              fix_reduction/2
           ]).
 
 :- use_module(semantic, [lambda_eq/4]).
+:- use_module(pritty_print).
 
-proc_reduction_(A,C):-
-    reduction(f([],A),f([],B)),!,
-    proc_reduction_(B,C).
-proc_reduction_(A,A).
+fix_reduction(A, C):-
+    reduction(f([],A),f([],B)),
+    !,
+    debug(lambda_calculus,"~@\n",write_lambda(B)),
+    fix_reduction(B, C).
+
+fix_reduction(A, A).
 
 reduction(f(_,A),_):-
     var(A),
