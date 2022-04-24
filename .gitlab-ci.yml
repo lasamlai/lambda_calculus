@@ -26,6 +26,7 @@ build-job:
 test-app:
   stage: test_base
   script:
+    - ls lambda_calculus
     - test "$(echo "(lx.x) a" | ./lambda_calculus)" == "$(echo "a" | ./lambda_calculus)"
     - test "$(echo "(lx.xx) a" | ./lambda_calculus)" == "$(echo "aa" | ./lambda_calculus)"
     - test "$(echo "lx.(lx.x)x" | ./lambda_calculus)" == "$(echo "<>" | ./lambda_calculus)"
@@ -40,6 +41,7 @@ include:
 test-zal:
   stage: test_syntax
   script:
+    - ls lambda_calculus
     - test "$(echo "-2Z" | ./lambda_calculus)" == "$(echo "(-2Z)" | ./lambda_calculus)"
     - test "$(echo "-1Z" | ./lambda_calculus)" == "$(echo "(-1Z)" | ./lambda_calculus)"
     - test "$(echo "0Z" | ./lambda_calculus)" == "$(echo "(0Z)" | ./lambda_calculus)"
