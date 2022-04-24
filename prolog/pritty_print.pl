@@ -19,13 +19,11 @@ write_lambda_(A,_,_):-
     var(A),
     !,
     format("\e[92m~w",[A]).
-/*
-write_lambda_(l(L1-L2,B),Z,R):-
-    L1 == L2,
+write_lambda_(l(L,B),Z,R):-
+    \+ \+ unify_with_occurs_check(L, B),
     !,
     format("\e[91mλ\e[90m_"),
     write_lambda_l(B,Z,R).
-*/
 write_lambda_(l(Z,B),Z,R):-
     !,
     format("\e[91mλ\e[34m~w",[Z]),
@@ -59,13 +57,11 @@ write_lambda_l(L,Z,R):-
     witch_lambda_const_(L,K),!,
     format("\e[91m."),
     write_lambda_unlam(K,Z,R).
-/*
-write_lambda_l(l(L1-L2,B),Z,R):-
-    L1 == L2,
+write_lambda_l(l(L,B),Z,R):-
+    \+ \+ unify_with_occurs_check(L, B),
     !,
     format("\e[90m_"),
     write_lambda_l(B,Z,R).
-*/
 write_lambda_l(l(Z,B),Z,R):-
     !,
     nazwa_zmien(Z,ZZ),
