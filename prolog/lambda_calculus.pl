@@ -40,7 +40,6 @@ arg_parse --> [].
 proc:-
     read_lambda(A),!,
     fix_reduction(A, C),
-    nl,
     write_lambda(C),
     nl,
     proc.
