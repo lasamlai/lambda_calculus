@@ -18,6 +18,14 @@ reduction(f(_,A),_):-
     var(A),
     !,
     fail.
+reduction(_, f(_, V)):-
+    nonvar(V),
+    !,
+    throw(error(V, "Output should be variable!")).
+reduction(f(_,l(A,_)),_):-
+    nonvar(A),
+    !,
+    throw(error(A, "lvalue should be a variable!")).
 reduction(f(W,a(V,A)),f(R,a(V,B))):-
     var(V),
     !,
@@ -59,8 +67,8 @@ reduction(f(U,a(a(EQ,L1),L2)), f(U, LL)):-
     ;   LL = l(_, l(C, C))).
 
 /* beta-reduction */
-reduction_l(f(U,a(l(W,C),A)),f(U,C)):-
-    copy_term(f(U,A), f(U, W)).
+reduction_l(f(U,a(l(W,C),A)),f(U,CC)):-
+    copy_term(f(U,l(W,C)), f(U,l(A,CC))).
 
 reduction_a(f(U,a(A,B)),f(G,a(C,D))):-
     reduction(f(U,A),f(K,C)),
