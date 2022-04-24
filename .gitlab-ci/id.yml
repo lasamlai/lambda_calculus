@@ -1,6 +1,7 @@
 test-id_syntax:
   stage: test_syntax
   script:
+    - ls lambda_calculus
     - test "$(echo "lx.x" | ./lambda_calculus)" == "$(echo "<>" | ./lambda_calculus)"
     - test "$(echo "la.a" | ./lambda_calculus)" == "$(echo "<>" | ./lambda_calculus)"
     - test "$(echo "\\x.x" | ./lambda_calculus)" == "$(echo "<>" | ./lambda_calculus)"
@@ -12,6 +13,7 @@ test-id_id:
   stage: test_base
   needs: [test-id_syntax]
   script:
+    - ls lambda_calculus
     - test "$(echo "<>" | ./lambda_calculus)" == "$(echo "<>" | ./lambda_calculus)"
     - test "$(echo "<><>" | ./lambda_calculus)" == "$(echo "<>" | ./lambda_calculus)"
     - test "$(echo "<><><>" | ./lambda_calculus)" == "$(echo "<>" | ./lambda_calculus)"
@@ -22,6 +24,7 @@ test-id_some:
   stage: test_complex
   needs: [test-id_syntax, test-id_id]
   script:
+    - ls lambda_calculus
     - test "$(echo "<> 12" | ./lambda_calculus)" == "$(echo "12" | ./lambda_calculus)"
     - test "$(echo "<> 5" | ./lambda_calculus)" == "$(echo "5" | ./lambda_calculus)"
     - test "$(echo "<> TRUE" | ./lambda_calculus)" == "$(echo "TRUE" | ./lambda_calculus)"
