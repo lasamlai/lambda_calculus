@@ -97,14 +97,12 @@ witch_lambda_const_(L,const(K)):-
     lambda_eq(L,LL).
 witch_lambda_const_(L,nat(N)):-
     lambda_n(L,N).
-/*
 witch_lambda_const_(L,int(Z,K)):-
     is_lambda_pair(L,A,B),
     lambda_n(A,N),
     lambda_n(B,M),!,
     Z is N - M,
     K is min(N,M).
-*/
 witch_lambda_const_(L, enum(Z,K)):-
     lambda_enum(L,Z,K,p).
 /*
@@ -112,22 +110,22 @@ witch_lambda_const_(L, bite(N,B)):-
     is_lambda_krot(L,K),
     length(K,B),
     num_bite(K,N).
+*/
 witch_lambda_const_(L,list([H|T])):-
     is_lambda_pair(L,H,Y),!,
     witch_lambda_list(Y,T).
 witch_lambda_const_(L,pair(X,Y)):-
     is_lambda_pair(L,X,Y),!.
+/*
 witch_lambda_const_(L,krot(K)):-
     is_lambda_krot(L,K),!.
 */
 witch_lambda_list(FALSE,[]):-
     lambda_const('FALSE',FALSE),!.
-/*
 witch_lambda_list(PAIR,[H|T]):-
     is_lambda_pair(PAIR,H,Y),
     !,
     witch_lambda_list(Y,T).
-*/
 witch_lambda_list(A,A).
 
 write_lambda_unlam(const(K),_,_):-
@@ -169,11 +167,10 @@ write_lambda_unlam(krot(K),Z,R):-
         format("\e[93m<"),
         write_lambda_(A,Z,R),
         write_lambda_krot(B,Z,R)).
-/*
-is_lambda_pair(l([B|A1]-A2, a(a(B,X),Y)),X,Y):-
-    var(B),
-    A1 == A2.
 
+is_lambda_pair(l(B, a(a(B,X),Y)),X, Y):-
+    \+ \+ unify_with_occurs_check(B, (X, Y)).
+/*
 is_lambda_krot(l([F|A1]-A2, W),M):-
     A1 == A2,
     lambda_krot_(F,W,[],M).
