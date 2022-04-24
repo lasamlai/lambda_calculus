@@ -197,11 +197,13 @@ num_bite(L,B):-
     num_bite_(L, 0, B).
 num_bite_([], A, A).
 num_bite_([H|T], W, L) :-
-    lambda_const('TRUE', H),
+    lambda_const('TRUE', TRUE),
+    lambda_eq(H, TRUE),
     WW is W * 2 + 1,
     num_bite_(T, WW, L).
 num_bite_([H|T], W, L) :-
-    lambda_const('FALSE', H),
+    lambda_const('FALSE', FALSE),
+    lambda_eq(H, FALSE),
     WW is W * 2,
     num_bite_(T, WW, L).
 
