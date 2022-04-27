@@ -10,17 +10,16 @@ write_lambda(A):-
     \+ \+ write_lambda_(A,a,1),
     format("\e[39m").
 
-write_lambda_(L,Z,R):-
-    witch_lambda_const_(L,K),
-    !,
-    write_lambda_unlam(K,Z,R).
-
 write_lambda_(A,_,_):-
     var(A),
     !,
     format("\e[92m~w",[A]).
+write_lambda_(L,Z,R):-
+    witch_lambda_const_(L,K),
+    !,
+    write_lambda_unlam(K,Z,R).
 write_lambda_(l(L,B),Z,R):-
-    \+ \+ unify_with_occurs_check(L, B),
+    free_var_in_expresion(L, B),
     !,
     format("\e[91mλ\e[90m_"),
     write_lambda_l(B,Z,R).
@@ -58,7 +57,7 @@ write_lambda_l(L,Z,R):-
     format("\e[91m."),
     write_lambda_unlam(K,Z,R).
 write_lambda_l(l(L,B),Z,R):-
-    \+ \+ unify_with_occurs_check(L, B),
+    free_var_in_expresion(L, B),
     !,
     format("\e[90m_"),
     write_lambda_l(B,Z,R).
@@ -165,7 +164,7 @@ write_lambda_unlam(krot(K),Z,R):-
         write_lambda_krot(B,Z,R)).
 
 is_lambda_pair(l(B, a(a(B,X),Y)),X, Y):-
-    \+ \+ unify_with_occurs_check(B, (X, Y)).
+    free_var_in_expresion(B, (X, Y)).
 
 is_lambda_krot(l(F, W),M):-
     lambda_krot_(F,W,[],M).
@@ -173,7 +172,7 @@ is_lambda_krot(l(F, W),M):-
 lambda_krot_(F,FF,A,A):-
     F == FF,!.
 lambda_krot_(F,a(W,X),L,M):-
-    \+ \+ unify_with_occurs_check(F, X),
+    free_var_in_expresion(F, X),
     lambda_krot_(F,W,[X|L],M).
 
 bracket(F, R, RR):-
@@ -182,6 +181,10 @@ bracket(F, R, RR):-
     next_color(R,RR),
     F,
     format("\e[38;5;~dm)",[R]).
+
+free_var_in_expresion(V, E) :-
+    V \== E,
+    \+ \+ unify_with_occurs_check(V, E).
 
 nazwa_zmien(z,'#1'):-!.
 nazwa_zmien(A,N):-
