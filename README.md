@@ -212,7 +212,7 @@ Ato := Macro | Var | '(' Lam ')'
 L_Exp := L L_Exp_
 L_Exp_ := LVar L_Exp_
        |  '.' Exp
-L := 'l' | 'λ' | '\''
+L := 'l' | 'λ' | '\\'
 
 Macro := [:upper:]+ | Tuple | List | Number_exp
 
