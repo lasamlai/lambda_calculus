@@ -14,6 +14,8 @@ fix_reduction(A, C):-
 
 fix_reduction(A, A).
 
+%!  reduction(In, Out)
+
 reduction(f(_,A),_):-
     var(A),
     !,
@@ -26,54 +28,81 @@ reduction(f(_,l(A,_)),_):-
     nonvar(A),
     !,
     throw(error(A, "lvalue should be a variable!")).
-reduction(f(W,a(V,A)),f(R,a(V,B))):-
-    var(V),
-    !,
+
+reduction(E1, E2) :-
+    get_flag(lambda_calculus:strategy, F),
+    strategy(F, CC),
+    call_or(CC, E1, E2).
+
+call_or([], _, _) :-
+    fail.
+call_or([C|_], E1, E2) :-
+    call(C, E1, E2),
+    !.
+call_or([_|T], E1, E2) :-
+    call_or(T, E1, E2).
+
+strategy(cbv, [app_left_reduction,
+               app_right_reduction,
+               beta_reduction
+              ]).
+strategy(cbn, [app_left_reduction,
+               beta_reduction,
+               app_right_reduction
+              ]).
+strategy(no, [app_left_reduction,
+              reduction_in_lambda,
+              beta_reduction,
+              app_right_reduction
+             ]).
+strategy(0, [reduction_in_lambda,
+             beta_reduction,
+             reduction_both
+            ]).
+
+/* reduction in application (left) */
+app_left_reduction(f(U,a(A,B)),f(K,a(C,B))):-
+    reduction(f(U,A),f(K,C)).
+
+/* reduction in application (right) */
+app_right_reduction(f(W,a(V,A)),f(R,a(V,B))):-
     reduction(f(W,A),f(R,B)).
 
-/* special */
-/*
-reduction(f(U,a(write,K)),f(U,l(C, l(_, C)))):-
-    !,
-    write_lambda(K).
-*/
-/*
-reduction(f(U,a(put_char,K)),f(U,l(C, l(_, C)))):-
-    !,
-    lambda_n(K,N),
-    put_char(N).
-*/
-
-reduction(f(U,l(A,B)),f(K,l(AA,D))):-
-    !,
+/* reduction in lambda */
+reduction_in_lambda(f(U,l(A,B)),f(K,l(AA,D))):-
     reduction(f([A|U],B),f([AA|K],D)).
 
-reduction(A,C):-
-    reduction_l(A,C),
-    !.
-/*
-reduction(A,C):-
-    (   reduction_a(A,B)
-    ->  reduction_l(B,C)
-    ;   reduction_l(A,C)).*/
-reduction(A,C):-
-    reduction_a(A,C).
+/* beta-reduction */
+beta_reduction(f(U,a(L,A)),f(U,CC)):-
+    nonvar(L),
+    l(W,C) = L,
+    !,
+    copy_term(f(U,l(W,C)), f(U,l(A,CC))).
 
-reduction(f(U,a(a(EQ,L1),L2)), f(U, LL)):-
+/* special */
+beta_reduction(f(U,a(L,L2)), f(U, LL)):-
+    nonvar(L),
+    a(EQ,L1) = L,
     EQ == 'EQ',
     !,
     (   \+ \+ lambda_eq(L1, L2)
     ->  LL = l(C, l(_, C))
     ;   LL = l(_, l(C, C))).
+/*
+beta_reduction(f(U,a(write,K)),f(U,l(C, l(_, C)))):-
+    !,
+    write_lambda(K).
+beta_reduction(f(U,a(put_char,K)),f(U,l(C, l(_, C)))):-
+    !,
+    lambda_n(K,N),
+    put_char(N).
+*/
 
-/* beta-reduction */
-reduction_l(f(U,a(l(W,C),A)),f(U,CC)):-
-    copy_term(f(U,l(W,C)), f(U,l(A,CC))).
-
-reduction_a(f(U,a(A,B)),f(G,a(C,D))):-
+/* reduction in application (both) */
+reduction_both(f(U,a(A,B)),f(G,a(C,D))):-
     reduction(f(U,A),f(K,C)),
     (   reduction(f(K,B),f(G,D))
     ->  true
     ;   K=G,B=D).
-reduction_a(f(U,a(A,B)),f(K,a(A,D))):-
+reduction_both(f(U,a(A,B)),f(K,a(A,D))):-
     reduction(f(U,B),f(K,D)).

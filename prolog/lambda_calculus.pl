@@ -35,6 +35,9 @@ main(P):-
     proc.
 
 arg_parse --> ['-d'],!,{debug(lambda_calculus)}, arg_parse.
+arg_parse --> ['--cbv'],!,{set_flag(lambda_calculus:strategy,cbv)}, arg_parse.
+arg_parse --> ['--cbn'],!,{set_flag(lambda_calculus:strategy,cbn)}, arg_parse.
+arg_parse --> ['--no'],!,{set_flag(lambda_calculus:strategy,no)}, arg_parse.
 arg_parse --> [].
 
 proc:-
