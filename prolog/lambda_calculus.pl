@@ -59,7 +59,7 @@ proc_string_clear(S):-
     write_lambda(R),nl.
 
 proc_reduction_clear_(A,C):-
-    reduction(f([],A),f([],B)),!,
+    reduction([], A, B),!,
     shell(clear),
     write_lambda(B),nl,
     proc_reduction_clear_(B,C).

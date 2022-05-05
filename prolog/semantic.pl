@@ -92,7 +92,7 @@ lambda_add_close_Y(Atom,String):-
     string_lambda(String,L),
     fix_reduction(L,LL),
     lambda_const('Y',Y),!,
-    reduction(f([],a(LL,Y)),f([],Lambda)),!,
+    reduction([], a(LL,Y), Lambda),!,
     lambda_const_add_(Atom,Lambda).
 
 :- volatile lambda_add_fix_close/3.
