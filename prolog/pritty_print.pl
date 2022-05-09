@@ -29,7 +29,9 @@ write_lambda_(l(Z,B),Z,R):-
     nazwa_zmien(Z,ZZ),
     write_lambda_l(B,ZZ,R).
 
-write_lambda_(a(A,a(B,C)),Z,R):-
+write_lambda_(a(A,E2),Z,R):-
+    nonvar(E2),
+    E2 = a(B,C),
     !,
     write_lambda_n(A,Z,R),
     bracket(write_lambda_(a(B,C),Z,RR),R,RR).
@@ -45,6 +47,10 @@ write_lambda_(A,_,_):-
 
 % Bracket if it is lambda
 
+write_lambda_n(A,_,_):-
+    var(A),
+    !,
+    format("\e[92m~w",[A]).
 write_lambda_n(l(K,W),Z,R):-
     !,
     bracket(write_lambda_(l(K,W),Z,RR), R, RR).
@@ -115,8 +121,10 @@ witch_lambda_const_(L,pair(X,Y)):-
     is_lambda_pair(L,X,Y),!.
 witch_lambda_const_(L,krot(K)):-
     is_lambda_krot(L,K),!.
-witch_lambda_list(FALSE,[]):-
-    lambda_const('FALSE',FALSE),!.
+witch_lambda_list(L,[]):-
+    lambda_const('FALSE',FALSE),
+    lambda_eq(FALSE,L),
+    !.
 witch_lambda_list(PAIR,[H|T]):-
     is_lambda_pair(PAIR,H,Y),
     !,
